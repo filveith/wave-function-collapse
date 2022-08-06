@@ -56,15 +56,16 @@ function loop(speed) {
 	// Set a random tile next to an existing tile
 
 	// FOR LATER : Make sure that the new tile fits with the current tiles
-	for (let i = 0; i < 16; i++) {
-		
-		const startCell = getRandomCell();
-		const startTile = getRandomTile();
-		// console.log("x", startCell.x, "y", startCell.y);
-		updateCell(startCell.x, startCell.y, startTile);
-		// console.log(cells);
-		drawImage(startTile, startCell.x, startCell.y);
-	}
+	// for (let i = 0; i < 15; i++) {
+		setInterval(() => {
+			const startCell = getRandomCell();
+			const startTile = getRandomTile();
+			// console.log("x", startCell.x, "y", startCell.y);
+			updateCell(startCell.x, startCell.y, startTile);
+			// console.log(cells);
+			drawImage(startTile, startCell.x, startCell.y);
+		},500)
+	// }
 
 	// let i = 0;
 	// while (i < MAX_TILES) {
@@ -89,10 +90,10 @@ function updateCell(x, y, tile) {
 			return true;
 		}
 	});
-	// console.log(updatedCell);
 	avalaibleCells.splice(updatedCell, 1);
-	// console.log(avalaibleCells);
-	// console.log("updatedCells", cells);
+
+	// Update the possibleTiles attributes of all the neighbors
+
 }
 
 function getRandomCell() {
