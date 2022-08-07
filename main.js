@@ -46,37 +46,42 @@ function setup() {
 
 	board = createEmptyBoard(CANVAS_SIZE);
 	document.body.append(board);
-	loop();
+	loop(500);
 }
 
 //speed is in millis
 function loop(speed) {
-	// choose a random cell on the board
+	// START :
+	// choose a random cell on the board and set a random tile
 
-	// Set a random tile next to an existing tile
+	// NEXT :
+	// choose a random cell next to the last placed tile
+	// if no cell is available next to the last placed tile go back to the before placed tile (maybe use a pile with pop and push ?)
+	// set a random tile that fits to the context
 
-	// FOR LATER : Make sure that the new tile fits with the current tiles
-	// for (let i = 0; i < 15; i++) {
-		setInterval(() => {
-			const startCell = getRandomCell();
-			const startTile = getRandomTile();
-			// console.log("x", startCell.x, "y", startCell.y);
-			updateCell(startCell.x, startCell.y, startTile);
-			// console.log(cells);
-			drawImage(startTile, startCell.x, startCell.y);
-		},500)
-	// }
+	const startCell = getRandomCell();
+	const startTile = getRandomTile();
+	// console.log("x", startCell.x, "y", startCell.y);
+	updateCell(startCell.x, startCell.y, startTile);
+	// console.log(cells);
+	drawImage(startTile, startCell.x, startCell.y);
 
-	// let i = 0;
-	// while (i < MAX_TILES) {
-	// 	const nbImg = getRandomInt(TILES_LIST.length);
-	// 	drawImage(
-	// 		TILES_LIST[nbImg].src,
-	// 		(CANVAS_SIZE / DIM) * i,
-	// 		(CANVAS_SIZE / DIM) * i
-	// 	);
-	// 	i++;
-	// }
+	let newCell, newTile, oldCell, oldTile;
+	let newCells = [];
+	const interval = setInterval(() => {
+		// When all the cells are collapsed we stop the interval
+		if (avalaibleCells.length === 0) {
+			clearInterval(interval);
+		}
+
+		newCell = getRandomCell();
+		newTile = getRandomTile();
+		// console.log("x", startCell.x, "y", startCell.y);
+		updateCell(newCell.x, newCell.y, newTile);
+		// console.log(cells);
+		drawImage(newTile, newCell.x, newCell.y);
+		newCells.push(newCell);
+	}, speed);
 }
 
 function updateCell(x, y, tile) {
@@ -93,7 +98,6 @@ function updateCell(x, y, tile) {
 	avalaibleCells.splice(updatedCell, 1);
 
 	// Update the possibleTiles attributes of all the neighbors
-
 }
 
 function getRandomCell() {
