@@ -1,4 +1,4 @@
-import { getRandomInt } from "./utils.js";
+import { getRandomCell, getRandomTile } from "./utils.js";
 
 // The dimension is the width and height of the board
 const DIM = 4;
@@ -46,7 +46,7 @@ function setup() {
 
 	board = createEmptyBoard(CANVAS_SIZE);
 	document.body.append(board);
-	loop(1000);
+	loop(500);
 }
 
 //speed is in millis
@@ -59,11 +59,20 @@ function loop(speed) {
 	console.log("start cell", startCell.possibleTiles);
 	updateCell(startTile, startCell);
 	// updateNeighborCells(startCell);
-	drawImage(startTile, startCell.coordinates.x, startCell.coordinates.y);
+	drawImageWithoutBorder(
+		startTile,
+		startCell.coordinates.x,
+		startCell.coordinates.y
+	);
 
 	newCells.push(startCell);
+	console.log(
+		"🚀 ~ file: main.js ~ line 69 ~ loop ~ newCells",
+		newCells.slice()
+	);
 
 	const interval = setInterval(() => {
+		// drawImage(old.currentTile, old.coordinates.x, old.coordinates.y);
 		// When all the cells are collapsed we stop the interval
 		if (avalaibleCells.length === 0) {
 			clearInterval(interval);
@@ -71,19 +80,59 @@ function loop(speed) {
 		let neighborCells;
 		let possibleNeighborCells;
 
+		console.log(newCells.slice());
 		neighborCells = getNeighbors(newCells[0]);
+
 		possibleNeighborCells = getPossibleNeighborCells(neighborCells);
 
 		newCell = getRandomCell(possibleNeighborCells);
 		try {
-			newTile = getRandomTile(newCell.possibleTiles);
-			updateCell(newTile, newCell);
-			// updateNeighborCells(newCell);
-			drawImage(newTile, newCell.coordinates.x, newCell.coordinates.y);
-			newCells.push(newCell);
+			if (newCell) {
+				if (newCell.possibleTiles) {
+					newCells.push(newCell);
+					newTile = getRandomTile(newCell.possibleTiles);
+
+					// try {
+					// 	newTile = getRandomTile(newCell.possibleTiles);
+					// } catch (error) {
+					// 	console.log('err',error);
+					// 	newTile = EMPTY;
+					// }
+					updateCell(newTile, newCell);
+					updateNeighborCells(newCell);
+					// drawImage(
+					// 	newCells[0].currentTile,
+					// 	newCells[0].coordinates.x,
+					// 	newCells[0].coordinates.y
+					// );
+					drawImageWithoutBorder(
+						newTile,
+						newCell.coordinates.x,
+						newCell.coordinates.y
+					);
+				}
+			} else {
+				console.log("no newCell");
+			}
 		} catch (error) {
 			console.log("err loop", error);
+			// try {
+			// 	console.log(newCell);
+			// 	if (newCell) {
+			// 		console.log("setting empty tile");
+			// 		updateCell(EMPTY, newCell);
+			// 		updateNeighborCells(newCell);
+			// 		drawImageWithoutBorder(
+			// 			EMPTY,
+			// 			newCell.coordinates.x,
+			// 			newCell.coordinates.y
+			// 		);
+			// 		newCells.push(newCell);
+			// 	}
+			// } catch (error) {
+			// 	console.log("no empty", error);
 			newCells.shift();
+			// }
 		}
 	}, speed);
 }
@@ -129,20 +178,37 @@ function getNeighbors(fromCell) {
 }
 
 function updateCell(tile, cell) {
-	cell.possibleTiles = [];
-	cell.collapsed = true;
-	cell.currentTile = tile;
-	avalaibleCells.splice(cell, 1);
+	console.log(cell);
+	if (cell) {
+		if (cell.possibleTiles) {
+			cell.possibleTiles = [];
+		}
+		cell.collapsed = true;
+		cell.currentTile = tile;
+		avalaibleCells.splice(cell, 1);
+	}
 }
 
 function updateNeighborCells(cell) {
+	/**
+	 * TODO :
+	 *
+	 * get all the non collapsed neighbors
+	 * get the tile of the current cell
+	 *
+	 * take each neighborCell[x]
+	 * remove the tiles that don't match the context
+	 *
+	 *
+	 */
 	const neighbors = getNeighbors(cell);
-	const nonCollapsedNeighbors = getPossibleNeighborCells(neighbors);
+	// we only want to update the non collapsed neighbor cells because the collapsed cells don't need to be updated
+	const neighborToUpdate = getPossibleNeighborCells(neighbors);
 	const currentCellTile = cell.currentTile;
-	const posLeft = 0,
-		posUp = 1,
-		posDown = 2,
-		posRight = 3;
+	const left = 0,
+		up = 1,
+		down = 2,
+		right = 3;
 
 	// pb is because we only take into account one neighbor and not all the neighbors
 	// so if we have a tile facing left and another tile facing up the possible tiles will be Down,Up,Right even though they should be Down only
@@ -150,395 +216,111 @@ function updateNeighborCells(cell) {
 
 	// solution could be to remove the cells that are not right
 
-	let indexTileToRemove;
-	let newPossibleTiles;
-
-	const currentTileSwitchLeft = (cell) => {
+	// when adding a new cell we update the one next to it
+	// update --> remove the tiles that don't fit into the current context (ONLY REMOVE)
+	if (currentCellTile) {
 		switch (currentCellTile) {
 			case LEFT:
-				// cell.possibleTiles = [DOWN, UP, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === LEFT
-				);
-				console.log("TILE INDEX", indexTileToRemove);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
+				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
+				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
+				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
+				removeTileFromPossibleTiles(neighborToUpdate[right], LEFT);
 				break;
 			case UP:
-				// cell.possibleTiles = [DOWN, UP, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === LEFT
+				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
+				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[down],
+					UP,
+					LEFT,
+					RIGHT
 				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				break;
-			case RIGHT:
-				// cell.possibleTiles = [DOWN, UP, LEFT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === RIGHT
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
+				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
 			case DOWN:
-				// cell.possibleTiles = [DOWN, UP, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === LEFT
+				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[up],
+					DOWN,
+					LEFT,
+					RIGHT
 				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				break;
-			default:
-				break;
-		}
-	};
-
-	const currentTileSwitchUp = (cell) => {
-		switch (currentCellTile) {
-			case LEFT:
-				// cell.possibleTiles = [DOWN, LEFT, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === UP
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				break;
-			case UP:
-				// cell.possibleTiles = [DOWN, LEFT, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === UP
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
+				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
+				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
 			case RIGHT:
-				// cell.possibleTiles = [DOWN, LEFT, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === UP
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
+				removeTileFromPossibleTiles(neighborToUpdate[left], RIGHT);
+				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
+				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
+				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
-			case DOWN:
-				// cell.possibleTiles = [UP];
-				newPossibleTiles = cell.possibleTiles;
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === DOWN
+			case EMPTY:
+				removeTileFromPossibleTiles(
+					neighborToUpdate[left],
+					UP,
+					DOWN,
+					RIGHT
 				);
-				if (indexTileToRemove !== -1)
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === LEFT
+				removeTileFromPossibleTiles(
+					neighborToUpdate[up],
+					DOWN,
+					LEFT,
+					RIGHT
 				);
-				if (indexTileToRemove !== -1)
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === RIGHT
+				removeTileFromPossibleTiles(
+					neighborToUpdate[down],
+					UP,
+					LEFT,
+					RIGHT
 				);
-				if (indexTileToRemove !== -1)
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-				cell.possibleTiles = newPossibleTiles;
+				removeTileFromPossibleTiles(
+					neighborToUpdate[right],
+					UP,
+					DOWN,
+					LEFT
+				);
 				break;
 			default:
+				console.log("NO CASE ????");
 				break;
 		}
-	};
+	}
+}
 
-	const currentTileSwitchRight = (cell) => {
-		switch (currentCellTile) {
-			case LEFT:
-				// cell.possibleTiles = [DOWN, UP, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === LEFT
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				break;
-			case UP:
-				// cell.possibleTiles = [DOWN, UP, LEFT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === RIGHT
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				break;
-			case RIGHT:
-				// cell.possibleTiles = [DOWN, UP, LEFT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === RIGHT
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				break;
-			case DOWN:
-				// cell.possibleTiles = [DOWN, UP, LEFT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === RIGHT
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				break;
-			default:
-				break;
-		}
-	};
-
-	const currentTileSwitchDown = (cell) => {
-		console.log(
-			"-------------------",
-			cell.possibleTiles.length,
-			cell.possibleTiles[0],
-			cell.possibleTiles[1],
-			cell.possibleTiles[2],
-			cell.possibleTiles[3]
-		);
-		switch (currentCellTile) {
-			case LEFT:
-				// cell.possibleTiles = [UP, LEFT, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === DOWN
-				);
-				if (indexTileToRemove !== -1) {
-					console.log(cell.possibleTiles[indexTileToRemove]);
-					console.log("removed");
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				console.log(
-					"-------------------",
-					cell.possibleTiles.length,
-					cell.possibleTiles[0],
-					cell.possibleTiles[1],
-					cell.possibleTiles[2],
-					cell.possibleTiles[3]
-				);
-
-				break;
-			case UP:
-				// cell.possibleTiles = [DOWN];
-				newPossibleTiles = cell.possibleTiles;
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === UP
-				);
-				if (indexTileToRemove !== -1)
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === LEFT
-				);
-				if (indexTileToRemove !== -1)
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === RIGHT
-				);
-				if (indexTileToRemove !== -1)
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-				cell.possibleTiles = newPossibleTiles;
-				console.log(
-					"-------------------",
-					cell.possibleTiles.length,
-					cell.possibleTiles[0],
-					cell.possibleTiles[1],
-					cell.possibleTiles[2],
-					cell.possibleTiles[3]
-				);
-
-				break;
-			case RIGHT:
-				// cell.possibleTiles = [UP, LEFT, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === DOWN
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-					console.log(cell.possibleTiles[indexTileToRemove]);
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				console.log(
-					"-------------------",
-					cell.possibleTiles.length,
-					cell.possibleTiles[0],
-					cell.possibleTiles[1],
-					cell.possibleTiles[2],
-					cell.possibleTiles[3]
-				);
-
-				break;
-			case DOWN:
-				// cell.possibleTiles = [UP, LEFT, RIGHT];
-				indexTileToRemove = cell.possibleTiles.findIndex(
-					(tile) => tile === DOWN
-				);
-				if (indexTileToRemove !== -1) {
-					console.log("removed");
-					console.log(cell.possibleTiles[indexTileToRemove]);
-
-					newPossibleTiles = cell.possibleTiles.splice(
-						indexTileToRemove - 1,
-						1
-					);
-					cell.possibleTiles = newPossibleTiles;
-				}
-				console.log(
-					"-------------------",
-					cell.possibleTiles.length,
-					cell.possibleTiles[0],
-					cell.possibleTiles[1],
-					cell.possibleTiles[2],
-					cell.possibleTiles[3]
-				);
-
-				break;
-			default:
-				break;
-		}
-	};
-
-	const t = nonCollapsedNeighbors.splice(0);
-	console.log("before possibleTiles update", t);
-	let index = 0;
-	for (let neighborCell of t) {
-		console.log(neighborCell);
-		console.log(index);
-		// If the neightbor is on the left, up, right, down of the current cell
-		if (neighborCell) {
-			switch (index) {
-				case posLeft:
-					currentTileSwitchLeft(neighborCell);
-					break;
-				case posUp:
-					currentTileSwitchUp(neighborCell);
-					break;
-				case posRight:
-					currentTileSwitchRight(neighborCell);
-					break;
-				case posDown:
-					currentTileSwitchDown(neighborCell);
-					break;
-				default:
-					break;
+/**
+ * It removes the tiles from the array that are passed as arguments.
+ * @param tiles
+ */
+function removeTileFromPossibleTiles(cell) {
+	if (cell) {
+		// console.log([cell].slice());
+		console.log("before", cell.possibleTiles.slice());
+		console.log(arguments);
+		// arguments is always the cell to remove the tiles from and the tiles to remove
+		// we loop over the cell because it will always be -1 in find index
+		for (let argument of arguments) {
+			// console.log(i, tiles);
+			// const arg1 = arguments[1] ?? "",
+			// 	arg2 = arguments[2] ?? "",
+			// 	arg3 = arguments[3] ?? "",
+			// 	arg4 = arguments[4] ?? "";
+			// const k = cell.possibleTiles.findIndex(
+			// 	(cell) =>
+			// 		cell === arg1 ||
+			// 		cell === arg2 ||
+			// 		cell === arg3 ||
+			// 		cell === arg4
+			// );
+			const arg = argument ?? "";
+			const k = cell.possibleTiles.findIndex((possibleTile) => possibleTile === arg);
+			console.log(k);
+			if (k !== -1) {
+				const removedPossibleTiles = cell.possibleTiles.splice(k, 1);
+				console.log("removed tiles", removedPossibleTiles);
+				console.log("after", cell.possibleTiles.slice());
 			}
 		}
-		console.log("After tiles update", cell.possibleTiles);
-		index++;
 	}
-	const tf = nonCollapsedNeighbors.splice(0);
-	console.log("after possibleTiles update", t);
-}
-
-function getRandomCell(cells) {
-	// We remove the null values to only get possible cells
-	const filteredCells = cells.filter((cell) => cell);
-	const randCell = getRandomInt(filteredCells.length);
-	return filteredCells[randCell];
-}
-
-function getRandomTile(tiles) {
-	// console.log("get tile", tiles);
-	const tileIndex = getRandomInt(tiles.length);
-	return tiles[tileIndex];
 }
 
 function createEmptyBoard(size) {
@@ -557,6 +339,15 @@ function drawImage(imgObject, x, y, w, h) {
 	const img = new Image();
 	img.src = imgObject.src;
 	img.onload = () => {
+		ctx.beginPath();
+		ctx.strokeStyle = "#f00"; // some color/style
+		ctx.lineWidth = 2; // thickness
+		ctx.strokeRect(
+			(x * CANVAS_SIZE) / DIM + 1,
+			(y * CANVAS_SIZE) / DIM + 1,
+			CANVAS_SIZE / DIM - 1,
+			CANVAS_SIZE / DIM - 1
+		);
 		ctx.drawImage(
 			img,
 			(x * CANVAS_SIZE) / DIM,
@@ -565,6 +356,26 @@ function drawImage(imgObject, x, y, w, h) {
 			h ? h : CANVAS_SIZE / DIM
 		);
 	};
+}
+
+function drawImageWithoutBorder(imgObject, x, y, w, h) {
+	if (imgObject) {
+		const canvas = document.getElementById("board");
+		let ctx = canvas.getContext("2d");
+
+		const img = new Image();
+		img.src = imgObject.src;
+		img.onload = () => {
+			ctx.beginPath();
+			ctx.drawImage(
+				img,
+				(x * CANVAS_SIZE) / DIM - 1,
+				(y * CANVAS_SIZE) / DIM,
+				w ? w : CANVAS_SIZE / DIM + 2,
+				h ? h : CANVAS_SIZE / DIM + 2
+			);
+		};
+	}
 }
 
 setup();

@@ -101,7 +101,36 @@
 // console.log(indexCell);
 // // console.log(index);
 
-let t = [1, 2, 3, 4, 5, 6, 7];
-const k = t.findIndex(nb => nb === 4);
-t.splice(k, 1);
-console.log(t);
+const EMPTY = { src: "img/blank.png", faces: [0, 0, 0, 0] };
+const DOWN = { src: "img/down.png", faces: [0, 1, 1, 1] };
+const LEFT = { src: "img/left.png", faces: [1, 0, 1, 1] };
+const RIGHT = { src: "img/right.png", faces: [1, 1, 1, 0] };
+const UP = { src: "img/up.png", faces: [1, 1, 0, 1] };
+
+const TILES_LIST = [DOWN, LEFT, RIGHT, UP];
+let tiles = TILES_LIST.slice();
+// let t = TILES_LIST.slice();
+// const k = t.findIndex((cell) => cell === LEFT);
+// t.splice(k, 1);
+// console.log(k);
+// console.log(t);
+// console.log(tiles);
+removeTileFromPossibleTiles(tiles, RIGHT, LEFT, UP);
+function removeTileFromPossibleTiles(tiles) {
+	// How to use overload ?
+	for (let i = 0; i < arguments.length; i++) {
+		console.log(i, tiles);
+		const k = tiles.findIndex(
+			(cell) =>
+				cell === arguments[1] ||
+				cell === arguments[2] ||
+				cell === arguments[3] ||
+				cell === arguments[4]
+		);
+		console.log(k);
+		if (k !== -1) {
+			tiles.splice(k, 1);
+		}
+		console.log(tiles);
+	}
+}
