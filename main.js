@@ -15,8 +15,10 @@ const DOWN = { src: "img/down.png", faces: [0, 1, 1, 1] };
 const LEFT = { src: "img/left.png", faces: [1, 0, 1, 1] };
 const RIGHT = { src: "img/right.png", faces: [1, 1, 1, 0] };
 const UP = { src: "img/up.png", faces: [1, 1, 0, 1] };
+const HORIZONTAL = { src: "img/horizontal.png", faces: [0, 1, 0, 1] };
+const VERTICAL = { src: "img/vertical.png", faces: [1, 0, 1, 0] };
 
-const TILES_LIST = [DOWN, LEFT, RIGHT, UP];
+const TILES_LIST = [DOWN, LEFT, RIGHT, UP, HORIZONTAL, VERTICAL];
 
 let board;
 let cells = [];
@@ -219,39 +221,42 @@ function updateNeighborCells(cell) {
 		switch (currentCellTile) {
 			case LEFT:
 				// console.log("LEFT");
-				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
-				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
-				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
+				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT, VERTICAL);
+				removeTileFromPossibleTiles(neighborToUpdate[up], UP, HORIZONTAL);
+				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN, HORIZONTAL);
 				removeTileFromPossibleTiles(
 					neighborToUpdate[right],
 					DOWN,
 					UP,
-					LEFT
+					LEFT,
+					VERTICAL
 				);
 				break;
 			case UP:
 				// console.log("UP");
-				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
-				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
+				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT, VERTICAL);
+				removeTileFromPossibleTiles(neighborToUpdate[up], UP, HORIZONTAL);
 				removeTileFromPossibleTiles(
 					neighborToUpdate[down],
 					UP,
 					LEFT,
-					RIGHT
+					RIGHT,
+					VERTICAL
 				);
-				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
+				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT, VERTICAL);
 				break;
 			case DOWN:
 				// console.log("DOWN");
-				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
+				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT, VERTICAL);
 				removeTileFromPossibleTiles(
 					neighborToUpdate[up],
 					DOWN,
 					LEFT,
-					RIGHT
+					RIGHT,
+					VERTICAL
 				);
-				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
-				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
+				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN, HORIZONTAL);
+				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT, VERTICAL);
 				break;
 			case RIGHT:
 				// console.log("RIGHT");
@@ -259,11 +264,52 @@ function updateNeighborCells(cell) {
 					neighborToUpdate[left],
 					DOWN,
 					UP,
+					RIGHT,
+					HORIZONTAL
+				);
+				removeTileFromPossibleTiles(neighborToUpdate[up], UP, HORIZONTAL);
+				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN, HORIZONTAL);
+				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT, VERTICAL);
+				break;
+			case HORIZONTAL:
+				// console.log("RIGHT");
+				removeTileFromPossibleTiles(
+					neighborToUpdate[left],
+					VERTICAL,
+					LEFT
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[up],
+					DOWN,
+					LEFT,
+					RIGHT,
+					VERTICAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[down],
+					UP,
+					LEFT,
+					RIGHT,
+					VERTICAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[right],
+					VERTICAL,
 					RIGHT
 				);
-				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
-				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
-				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
+				break;
+			case VERTICAL:
+				// console.log("RIGHT");
+				removeTileFromPossibleTiles(
+					neighborToUpdate[left],
+					UP,
+					DOWN,
+					RIGHT,
+					HORIZONTAL
+				);
+				removeTileFromPossibleTiles(neighborToUpdate[up], UP, HORIZONTAL);
+				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN, HORIZONTAL);
+				removeTileFromPossibleTiles(neighborToUpdate[right], UP, DOWN, LEFT, HORIZONTAL);
 				break;
 			case EMPTY:
 				// console.log("EMPTY");
