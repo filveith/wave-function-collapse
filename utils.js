@@ -1,3 +1,6 @@
+export const DIM = 4;
+export const CANVAS_SIZE = 400;
+
 function getRandomInt(max) {
 	return Math.floor(Math.random() * max);
 }

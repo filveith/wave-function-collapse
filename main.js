@@ -1,8 +1,13 @@
-import { getRandomCell, getRandomTile } from "./utils.js";
+import { drawAllPossibleTiles, drawTile } from "./draw.js";
+import {
+	CANVAS_SIZE,
+	changeGameState,
+	DIM,
+	getRandomCell,
+	getRandomTile,
+} from "./utils.js";
 
 // The dimension is the width and height of the board
-const DIM = 4;
-const CANVAS_SIZE = 400;
 
 //faces = [up, right, down, left]
 const EMPTY = { src: "img/blank.png", faces: [0, 0, 0, 0] };
@@ -19,6 +24,7 @@ const MAX_TILES = DIM * DIM;
 let cells = [];
 
 let avalaibleCells = [];
+let pause = false;
 
 const emptyCell = {
 	coordinates: { x: undefined, y: undefined },
@@ -32,6 +38,7 @@ const emptyCell = {
 };
 
 function setup() {
+	document.getElementById("myBtn").addEventListener("click", ()=>{pause=!pause});
 	cells = Array.from({ length: DIM }, (e, y) =>
 		Array.from({ length: DIM }, (e, x) => {
 			const newEmptyCell = Object.assign({}, emptyCell);
@@ -46,6 +53,8 @@ function setup() {
 
 	board = createEmptyBoard(CANVAS_SIZE);
 	document.body.append(board);
+	// drawAllPossibleTiles(cells)
+
 	loop(500);
 }
 
@@ -56,83 +65,82 @@ function loop(speed) {
 
 	const startCell = getRandomCell(avalaibleCells);
 	const startTile = getRandomTile(startCell.possibleTiles);
-	console.log("start cell", startCell.possibleTiles);
 	updateCell(startTile, startCell);
-	// updateNeighborCells(startCell);
-	drawImageWithoutBorder(
-		startTile,
-		startCell.coordinates.x,
-		startCell.coordinates.y
-	);
+	updateNeighborCells(startCell);
+	drawTile(startTile, startCell.coordinates.x, startCell.coordinates.y);
 
 	newCells.push(startCell);
-	console.log(
-		"🚀 ~ file: main.js ~ line 69 ~ loop ~ newCells",
-		newCells.slice()
-	);
 
 	const interval = setInterval(() => {
-		// drawImage(old.currentTile, old.coordinates.x, old.coordinates.y);
-		// When all the cells are collapsed we stop the interval
-		if (avalaibleCells.length === 0) {
-			clearInterval(interval);
-		}
-		let neighborCells;
-		let possibleNeighborCells;
+		console.log('PAUSE____________________________________',pause);
+		if (!pause) {
+			drawAllPossibleTiles(cells);
+			console.log(
+				"-------------------------------------------------------"
+			);
+			// When all the cells are collapsed we stop the interval
+			if (avalaibleCells.length === 0) {
+				console.log("Finished");
+				clearInterval(interval);
+			}
+			let neighborCells;
+			let possibleNeighborCells;
 
-		console.log(newCells.slice());
-		neighborCells = getNeighbors(newCells[0]);
+			// console.log("new cells pile", newCells.slice());
+			neighborCells = getNeighbors(newCells[0]);
+			console.log("neighbors", neighborCells, "of", newCells[0]);
 
-		possibleNeighborCells = getPossibleNeighborCells(neighborCells);
+			possibleNeighborCells = getPossibleNeighborCells(neighborCells);
+			console.log(
+				"possible neighbors",
+				possibleNeighborCells,
+				"of",
+				newCells[0]
+			);
 
-		newCell = getRandomCell(possibleNeighborCells);
-		try {
-			if (newCell) {
-				if (newCell.possibleTiles) {
-					newCells.push(newCell);
-					newTile = getRandomTile(newCell.possibleTiles);
-
-					// try {
-					// 	newTile = getRandomTile(newCell.possibleTiles);
-					// } catch (error) {
-					// 	console.log('err',error);
-					// 	newTile = EMPTY;
-					// }
-					updateCell(newTile, newCell);
-					updateNeighborCells(newCell);
-					// drawImage(
-					// 	newCells[0].currentTile,
-					// 	newCells[0].coordinates.x,
-					// 	newCells[0].coordinates.y
-					// );
-					drawImageWithoutBorder(
+			newCell = getRandomCell(possibleNeighborCells);
+			console.log("choosen cell of possible neighbors", newCell);
+			try {
+				if (newCell) {
+					if (newCell.possibleTiles) {
+						console.log(
+							"available tiles",
+							newCell.possibleTiles.slice()
+						);
+						newTile = getRandomTile(newCell.possibleTiles);
+					} else {
+						newTile = EMPTY;
+					}
+					if (newTile === undefined) {
+						newTile = EMPTY;
+					}
+					drawTile(
 						newTile,
 						newCell.coordinates.x,
 						newCell.coordinates.y
 					);
+
+					updateCell(newTile, newCell);
+					// updateNeighborCells(newCell);
+
+					// console.log("before push", newCells.slice());
+					newCells.push(newCell);
+					// console.log("after push", newCells.slice());
+				} else {
+					// console.log("before remove", newCells.slice());
+					newCells.shift();
+					// console.log("after remove", newCells.slice());
+
+					console.log("no newCell");
 				}
-			} else {
+			} catch (error) {
+				console.log("err loop", error);
+				console.log("before remove", newCells.slice());
+				newCells.shift();
+				console.log("after remove", newCells.slice());
+
 				console.log("no newCell");
 			}
-		} catch (error) {
-			console.log("err loop", error);
-			// try {
-			// 	console.log(newCell);
-			// 	if (newCell) {
-			// 		console.log("setting empty tile");
-			// 		updateCell(EMPTY, newCell);
-			// 		updateNeighborCells(newCell);
-			// 		drawImageWithoutBorder(
-			// 			EMPTY,
-			// 			newCell.coordinates.x,
-			// 			newCell.coordinates.y
-			// 		);
-			// 		newCells.push(newCell);
-			// 	}
-			// } catch (error) {
-			// 	console.log("no empty", error);
-			newCells.shift();
-			// }
 		}
 	}, speed);
 }
@@ -178,11 +186,9 @@ function getNeighbors(fromCell) {
 }
 
 function updateCell(tile, cell) {
-	console.log(cell);
+	console.log("update cell", cell);
 	if (cell) {
-		if (cell.possibleTiles) {
-			cell.possibleTiles = [];
-		}
+		cell.possibleTiles = [];
 		cell.collapsed = true;
 		cell.currentTile = tile;
 		avalaibleCells.splice(cell, 1);
@@ -299,21 +305,11 @@ function removeTileFromPossibleTiles(cell) {
 		// arguments is always the cell to remove the tiles from and the tiles to remove
 		// we loop over the cell because it will always be -1 in find index
 		for (let argument of arguments) {
-			// console.log(i, tiles);
-			// const arg1 = arguments[1] ?? "",
-			// 	arg2 = arguments[2] ?? "",
-			// 	arg3 = arguments[3] ?? "",
-			// 	arg4 = arguments[4] ?? "";
-			// const k = cell.possibleTiles.findIndex(
-			// 	(cell) =>
-			// 		cell === arg1 ||
-			// 		cell === arg2 ||
-			// 		cell === arg3 ||
-			// 		cell === arg4
-			// );
 			const arg = argument ?? "";
-			const k = cell.possibleTiles.findIndex((possibleTile) => possibleTile === arg);
-			console.log(k);
+			const k = cell.possibleTiles.findIndex(
+				(possibleTile) => possibleTile === arg
+			);
+			// console.log(k);
 			if (k !== -1) {
 				const removedPossibleTiles = cell.possibleTiles.splice(k, 1);
 				console.log("removed tiles", removedPossibleTiles);
@@ -330,52 +326,6 @@ function createEmptyBoard(size) {
 	emptyBoard.width = size;
 	emptyBoard.style.backgroundColor = "black";
 	return emptyBoard;
-}
-
-function drawImage(imgObject, x, y, w, h) {
-	const canvas = document.getElementById("board");
-	let ctx = canvas.getContext("2d");
-
-	const img = new Image();
-	img.src = imgObject.src;
-	img.onload = () => {
-		ctx.beginPath();
-		ctx.strokeStyle = "#f00"; // some color/style
-		ctx.lineWidth = 2; // thickness
-		ctx.strokeRect(
-			(x * CANVAS_SIZE) / DIM + 1,
-			(y * CANVAS_SIZE) / DIM + 1,
-			CANVAS_SIZE / DIM - 1,
-			CANVAS_SIZE / DIM - 1
-		);
-		ctx.drawImage(
-			img,
-			(x * CANVAS_SIZE) / DIM,
-			(y * CANVAS_SIZE) / DIM,
-			w ? w : CANVAS_SIZE / DIM,
-			h ? h : CANVAS_SIZE / DIM
-		);
-	};
-}
-
-function drawImageWithoutBorder(imgObject, x, y, w, h) {
-	if (imgObject) {
-		const canvas = document.getElementById("board");
-		let ctx = canvas.getContext("2d");
-
-		const img = new Image();
-		img.src = imgObject.src;
-		img.onload = () => {
-			ctx.beginPath();
-			ctx.drawImage(
-				img,
-				(x * CANVAS_SIZE) / DIM - 1,
-				(y * CANVAS_SIZE) / DIM,
-				w ? w : CANVAS_SIZE / DIM + 2,
-				h ? h : CANVAS_SIZE / DIM + 2
-			);
-		};
-	}
 }
 
 setup();
