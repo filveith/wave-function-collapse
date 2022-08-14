@@ -68,3 +68,32 @@ compareLeft(middleTile, leftCell);
 compareRight(middleTile, rightCell);
 compareUp(middleTile, upCell);
 compareDown(middleTile, downCell);
+
+
+
+/**
+ * It removes the tiles from the array that are passed as arguments.
+ * @param tiles
+ */
+ function removeTileFromPossibleTiles(cell) {
+	if (cell) {
+		cell.possibleTiles = cell.possibleTiles.slice();
+		// console.log([cell].slice());
+		// console.log("before", cell.possibleTiles.slice());
+		// console.log(arguments);
+		// arguments is always the cell to remove the tiles from and the tiles to remove
+		// we loop over the cell because it will always be -1 in find index
+		for (let argument of arguments) {
+			const arg = argument ?? "";
+			const k = cell.possibleTiles.findIndex(
+				(possibleTile) => possibleTile === arg
+			);
+			// console.log(k);
+			if (k !== -1) {
+				const removedPossibleTiles = cell.possibleTiles.splice(k, 1);
+				// console.log("removed tiles", removedPossibleTiles);
+				// console.log("after", cell.possibleTiles.slice());
+			}
+		}
+	}
+}

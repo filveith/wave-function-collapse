@@ -1,4 +1,4 @@
-import { getPossibleNeighborCells, updateCell } from "./cell.js";
+import { compareDown, compareLeft, compareRight, compareUp, getPossibleNeighborCells, updateCell } from "./cell.js";
 import { drawAllPossibleTiles, drawTile } from "./draw.js";
 import {
 	CANVAS_SIZE,
@@ -16,14 +16,21 @@ const DOWN = { src: "img/down.png", faces: [0, 1, 1, 1] };
 const LEFT = { src: "img/left.png", faces: [1, 0, 1, 1] };
 const RIGHT = { src: "img/right.png", faces: [1, 1, 1, 0] };
 const UP = { src: "img/up.png", faces: [1, 1, 0, 1] };
+
 const DOWN_END = { src: "img/down_end.png", faces: [1, 0, 0, 0] };
 const LEFT_END = { src: "img/left_end.png", faces: [0, 0, 0, 1] };
 const RIGHT_END = { src: "img/right_end.png", faces: [0, 1, 0, 0] };
 const UP_END = { src: "img/up_end.png", faces: [0, 0, 1, 0] };
+
+const CORNER_DOWN_RIGHT = { src: "img/corner_down_right.png", faces: [0, 1, 1, 0] };
+const CORNER_DOWN_LEFT = { src: "img/corner_down_left.png", faces: [0, 0, 1, 1] };
+const CORNER_UP_RIGHT = { src: "img/corner_up_right.png", faces: [1, 1, 0, 0] };
+const CORNER_UP_LEFT = { src: "img/corner_up_left.png", faces: [1, 0, 0, 1] };
+
 const HORIZONTAL = { src: "img/horizontal.png", faces: [0, 1, 0, 1] };
 const VERTICAL = { src: "img/vertical.png", faces: [1, 0, 1, 0] };
 
-const TILES_LIST = [DOWN, LEFT, RIGHT, UP, HORIZONTAL, VERTICAL];
+const TILES_LIST = [DOWN, LEFT, RIGHT, UP, HORIZONTAL, VERTICAL, DOWN_END, LEFT_END, UP_END, RIGHT_END, CORNER_DOWN_RIGHT, CORNER_DOWN_LEFT, CORNER_UP_LEFT, CORNER_UP_RIGHT];
 
 let board;
 let cells = [];
@@ -164,7 +171,6 @@ function setSpeed() {
 }
 
 function updateNeighborCells(cell) {
-
 	const neighbors = getNeighbors(cell, cells);
 	// we only want to update the non collapsed neighbor cells because the collapsed cells don't need to be updated
 	const neighborToUpdate = getPossibleNeighborCells(neighbors);
@@ -176,220 +182,13 @@ function updateNeighborCells(cell) {
 
 	// console.log("__________________updateNeighborCells___________________");
 	// console.log("currentCellTile", currentCellTile);
-	if (currentCellTile) {
-		switch (currentCellTile) {
-			case LEFT:
-				// console.log("LEFT");
-				removeTileFromPossibleTiles(
-					neighborToUpdate[left],
-					LEFT,
-					VERTICAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[up],
-					UP,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[down],
-					DOWN,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[right],
-					DOWN,
-					UP,
-					LEFT,
-					VERTICAL
-				);
-				break;
-			case UP:
-				// console.log("UP");
-				removeTileFromPossibleTiles(
-					neighborToUpdate[left],
-					LEFT,
-					VERTICAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[up],
-					UP,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[down],
-					UP,
-					LEFT,
-					RIGHT,
-					VERTICAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[right],
-					RIGHT,
-					VERTICAL
-				);
-				break;
-			case DOWN:
-				// console.log("DOWN");
-				removeTileFromPossibleTiles(
-					neighborToUpdate[left],
-					LEFT,
-					VERTICAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[up],
-					DOWN,
-					LEFT,
-					RIGHT,
-					VERTICAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[down],
-					DOWN,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[right],
-					RIGHT,
-					VERTICAL
-				);
-				break;
-			case RIGHT:
-				// console.log("RIGHT");
-				removeTileFromPossibleTiles(
-					neighborToUpdate[left],
-					DOWN,
-					UP,
-					RIGHT,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[up],
-					UP,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[down],
-					DOWN,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[right],
-					RIGHT,
-					VERTICAL
-				);
-				break;
-			case HORIZONTAL:
-				// console.log("RIGHT");
-				removeTileFromPossibleTiles(
-					neighborToUpdate[left],
-					VERTICAL,
-					LEFT
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[up],
-					DOWN,
-					LEFT,
-					RIGHT,
-					VERTICAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[down],
-					UP,
-					LEFT,
-					RIGHT,
-					VERTICAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[right],
-					VERTICAL,
-					RIGHT
-				);
-				break;
-			case VERTICAL:
-				// console.log("RIGHT");
-				removeTileFromPossibleTiles(
-					neighborToUpdate[left],
-					UP,
-					DOWN,
-					RIGHT,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[up],
-					UP,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[down],
-					DOWN,
-					HORIZONTAL
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[right],
-					UP,
-					DOWN,
-					LEFT,
-					HORIZONTAL
-				);
-				break;
-			case EMPTY:
-				// console.log("EMPTY");
-				removeTileFromPossibleTiles(
-					neighborToUpdate[left],
-					UP,
-					DOWN,
-					RIGHT
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[up],
-					DOWN,
-					LEFT,
-					RIGHT
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[down],
-					UP,
-					LEFT,
-					RIGHT
-				);
-				removeTileFromPossibleTiles(
-					neighborToUpdate[right],
-					UP,
-					DOWN,
-					LEFT
-				);
-				break;
-			default:
-				console.log("NO CASE ????");
-				break;
-		}
-	}
-}
-
-/**
- * It removes the tiles from the array that are passed as arguments.
- * @param tiles
- */
-function removeTileFromPossibleTiles(cell) {
+	// console.log('neighbors',neighborToUpdate);
+	// console.log('middleCell',cell);
 	if (cell) {
-		cell.possibleTiles = cell.possibleTiles.slice();
-		// console.log([cell].slice());
-		// console.log("before", cell.possibleTiles.slice());
-		// console.log(arguments);
-		// arguments is always the cell to remove the tiles from and the tiles to remove
-		// we loop over the cell because it will always be -1 in find index
-		for (let argument of arguments) {
-			const arg = argument ?? "";
-			const k = cell.possibleTiles.findIndex(
-				(possibleTile) => possibleTile === arg
-			);
-			// console.log(k);
-			if (k !== -1) {
-				const removedPossibleTiles = cell.possibleTiles.splice(k, 1);
-				// console.log("removed tiles", removedPossibleTiles);
-				// console.log("after", cell.possibleTiles.slice());
-			}
-		}
+		compareLeft(cell, neighborToUpdate[left]);
+		compareRight(cell, neighborToUpdate[right]);
+		compareUp(cell, neighborToUpdate[up]);
+		compareDown(cell, neighborToUpdate[down]);
 	}
 }
 

@@ -1,3 +1,7 @@
+const up = 0,
+	right = 1,
+	down = 2,
+	left = 3;
 
 export function updateCell(tile, cell, avalaibleCells) {
 	// console.log("update cell", cell);
@@ -14,7 +18,7 @@ export function getPossibleNeighborCells(neighborCells) {
 	for (const neighborCell of neighborCells) {
 		// we add null values to keep the order of the array and always know the position of each cell (left, up, right, down)
 		try {
-	 	// If the cell is collapsed we insert a null value
+			// If the cell is collapsed we insert a null value
 			if (!neighborCell.collapsed) {
 				possibleNeighbors.push(neighborCell);
 			} else {
@@ -26,4 +30,58 @@ export function getPossibleNeighborCells(neighborCells) {
 		}
 	}
 	return possibleNeighbors;
-} 
+}
+
+export function compareLeft(middleCell, neighborCell) {
+	if (neighborCell) {
+		let newPossibleTiles = [];
+		for (let leftTile of neighborCell.possibleTiles) {
+			if (leftTile.faces[right] === middleCell.currentTile.faces[left]) {
+				newPossibleTiles.push(leftTile);
+			}
+		}
+		neighborCell.possibleTiles = newPossibleTiles;
+		console.log("left", neighborCell.possibleTiles.slice());
+	}
+}
+
+export function compareUp(middleCell, neighborCell) {
+	if (neighborCell) {
+		let newPossibleTiles = [];
+		for (let neighborTile of neighborCell.possibleTiles) {
+			if (neighborTile.faces[down] === middleCell.currentTile.faces[up]) {
+				newPossibleTiles.push(neighborTile);
+			}
+		}
+		neighborCell.possibleTiles = newPossibleTiles;
+		console.log("up", neighborCell.possibleTiles.slice());
+	}
+}
+
+export function compareDown(middleCell, neighborCell) {
+	if (neighborCell) {
+		let newPossibleTiles = [];
+		for (let neighborTile of neighborCell.possibleTiles) {
+			if (neighborTile.faces[up] === middleCell.currentTile.faces[down]) {
+				newPossibleTiles.push(neighborTile);
+			}
+		}
+		neighborCell.possibleTiles = newPossibleTiles;
+		console.log("down", neighborCell.possibleTiles.slice());
+	}
+}
+
+export function compareRight(middleCell, neighborCell) {
+	if (neighborCell) {
+		let newPossibleTiles = [];
+		for (let neighborTile of neighborCell.possibleTiles) {
+			if (
+				neighborTile.faces[left] === middleCell.currentTile.faces[right]
+			) {
+				newPossibleTiles.push(neighborTile);
+			}
+		}
+		neighborCell.possibleTiles = newPossibleTiles;
+		console.log("right", neighborCell.possibleTiles.slice());
+	}
+}
