@@ -14,8 +14,13 @@
 </head>
 
 <body>
-    <button id="myBtn">Next</button>
-    <input type="range" min="0" max="10000" value="5000" class="slider" id="speedSlider">
+
+    <button id="myBtn">Pause</button>
+    <form>
+        Speed of generation (in ms)
+        <input type="range" id="speedRange" min="0" max="10000" value="0" oninput="this.form.speedInput.value=this.value" />
+        <input type="number" id="speedInput" min="0" max="10000" value="0" oninput="this.form.speedRange.value=this.value" />
+    </form>
     <script type="module" src="main.js"></script>
 </body>
 
