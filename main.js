@@ -1,7 +1,7 @@
 import { drawAllPossibleTiles, drawTile } from "./draw.js";
 import {
 	CANVAS_SIZE,
-	changeGameState,
+	createEmptyBoard,
 	DIM,
 	getRandomCell,
 	getRandomTile,
@@ -10,7 +10,7 @@ import {
 // The dimension is the width and height of the board
 
 //faces = [up, right, down, left]
-const EMPTY = { src: "img/blank.png", faces: [0, 0, 0, 0] };
+export const EMPTY = { src: "img/blank.png", faces: [0, 0, 0, 0] };
 const DOWN = { src: "img/down.png", faces: [0, 1, 1, 1] };
 const LEFT = { src: "img/left.png", faces: [1, 0, 1, 1] };
 const RIGHT = { src: "img/right.png", faces: [1, 1, 1, 0] };
@@ -24,7 +24,7 @@ const MAX_TILES = DIM * DIM;
 let cells = [];
 
 let avalaibleCells = [];
-let pause = false;
+let pause = true;
 
 const emptyCell = {
 	coordinates: { x: undefined, y: undefined },
@@ -38,7 +38,9 @@ const emptyCell = {
 };
 
 function setup() {
-	document.getElementById("myBtn").addEventListener("click", ()=>{pause=!pause});
+	document.getElementById("myBtn").addEventListener("click", () => {
+		pause = !pause;
+	});
 	cells = Array.from({ length: DIM }, (e, y) =>
 		Array.from({ length: DIM }, (e, x) => {
 			const newEmptyCell = Object.assign({}, emptyCell);
@@ -46,6 +48,17 @@ function setup() {
 			return Object.assign({}, newEmptyCell);
 		})
 	);
+
+	// console.log(cells[0][0].possibleTiles.slice());
+	// console.log(cells[0][1].possibleTiles.slice());
+	// cells[0][0].possibleTiles = TILES_LIST.slice()
+	// cells[0][1].possibleTiles = TILES_LIST.slice()
+	// cells[0][0].possibleTiles.splice(0,1)
+	// console.log(cells[0][0].possibleTiles.slice());
+	// console.log(cells[0][1].possibleTiles.slice());
+	// cells[0][1].possibleTiles.splice(2,1)
+	// console.log(cells[0][0].possibleTiles.slice());
+	// console.log(cells[0][1].possibleTiles.slice());
 
 	avalaibleCells = cells.flat();
 	// console.log(cells);
@@ -67,14 +80,14 @@ function loop(speed) {
 	const startTile = getRandomTile(startCell.possibleTiles);
 	updateCell(startTile, startCell);
 	updateNeighborCells(startCell);
+	drawAllPossibleTiles(cells);
 	drawTile(startTile, startCell.coordinates.x, startCell.coordinates.y);
 
 	newCells.push(startCell);
 
 	const interval = setInterval(() => {
-		console.log('PAUSE____________________________________',pause);
 		if (!pause) {
-			drawAllPossibleTiles(cells);
+			console.log("newCells", newCells);
 			console.log(
 				"-------------------------------------------------------"
 			);
@@ -109,9 +122,11 @@ function loop(speed) {
 						);
 						newTile = getRandomTile(newCell.possibleTiles);
 					} else {
+						console.log("E;PTY ");
 						newTile = EMPTY;
 					}
 					if (newTile === undefined) {
+						console.log("E;PTY ");
 						newTile = EMPTY;
 					}
 					drawTile(
@@ -121,7 +136,7 @@ function loop(speed) {
 					);
 
 					updateCell(newTile, newCell);
-					// updateNeighborCells(newCell);
+					updateNeighborCells(newCell);
 
 					// console.log("before push", newCells.slice());
 					newCells.push(newCell);
@@ -141,6 +156,8 @@ function loop(speed) {
 
 				console.log("no newCell");
 			}
+			// pause = true;
+			drawAllPossibleTiles(cells);
 		}
 	}, speed);
 }
@@ -224,15 +241,24 @@ function updateNeighborCells(cell) {
 
 	// when adding a new cell we update the one next to it
 	// update --> remove the tiles that don't fit into the current context (ONLY REMOVE)
+	console.log("__________________updateNeighborCells___________________");
+	console.log("currentCellTile", currentCellTile);
 	if (currentCellTile) {
 		switch (currentCellTile) {
 			case LEFT:
+				console.log("LEFT");
 				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
 				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
 				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
-				removeTileFromPossibleTiles(neighborToUpdate[right], LEFT);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[right],
+					DOWN,
+					UP,
+					LEFT
+				);
 				break;
 			case UP:
+				console.log("UP");
 				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
 				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
 				removeTileFromPossibleTiles(
@@ -244,6 +270,7 @@ function updateNeighborCells(cell) {
 				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
 			case DOWN:
+				console.log("DOWN");
 				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
 				removeTileFromPossibleTiles(
 					neighborToUpdate[up],
@@ -255,12 +282,19 @@ function updateNeighborCells(cell) {
 				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
 			case RIGHT:
-				removeTileFromPossibleTiles(neighborToUpdate[left], RIGHT);
+				console.log("RIGHT");
+				removeTileFromPossibleTiles(
+					neighborToUpdate[left],
+					DOWN,
+					UP,
+					RIGHT
+				);
 				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
 				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
 				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
 			case EMPTY:
+				console.log("EMPTY");
 				removeTileFromPossibleTiles(
 					neighborToUpdate[left],
 					UP,
@@ -299,6 +333,7 @@ function updateNeighborCells(cell) {
  */
 function removeTileFromPossibleTiles(cell) {
 	if (cell) {
+		cell.possibleTiles = cell.possibleTiles.slice();
 		// console.log([cell].slice());
 		console.log("before", cell.possibleTiles.slice());
 		console.log(arguments);
@@ -317,15 +352,6 @@ function removeTileFromPossibleTiles(cell) {
 			}
 		}
 	}
-}
-
-function createEmptyBoard(size) {
-	let emptyBoard = document.createElement("canvas");
-	emptyBoard.id = "board";
-	emptyBoard.height = size;
-	emptyBoard.width = size;
-	emptyBoard.style.backgroundColor = "black";
-	return emptyBoard;
 }
 
 setup();

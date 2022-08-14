@@ -1,22 +1,33 @@
+import { EMPTY } from "./main.js";
 import { CANVAS_SIZE, DIM } from "./utils.js";
 
 export function drawAllPossibleTiles(board) {
-    let i = 0
+	let i = 0;
+	console.log(board);
 	for (let column of board) {
 		for (let cell of column) {
-            for (let tileNb in cell.possibleTiles) {
-                const x = cell.coordinates.x + tileNb * 25 + i * (CANVAS_SIZE/4);
-				draw(
-                    cell.possibleTiles[tileNb],
-					x,
-					cell.coordinates.y,
-					CANVAS_SIZE / DIM / 4,
-					CANVAS_SIZE / DIM / 4
-				);
+			for (let tileNb in [0, 1, 2, 3]) {
+				if (!cell.collapsed) {
+					let tile = cell.possibleTiles[tileNb];
+					if (tile === undefined) {
+						tile = EMPTY;
+					}
+					const x =
+						cell.coordinates.x +
+						tileNb * 25 +
+						i * (CANVAS_SIZE / 4);
+					draw(
+						tile,
+						x,
+						cell.coordinates.y,
+						CANVAS_SIZE / DIM / 4,
+						CANVAS_SIZE / DIM / 4
+					);
+				}
 			}
-            i++
+			i++;
 		}
-        i=0
+		i = 0;
 	}
 }
 

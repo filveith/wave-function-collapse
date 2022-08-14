@@ -17,3 +17,12 @@ export function getRandomTile(tiles) {
 	const tileIndex = getRandomInt(tiles.length);
 	return tiles[tileIndex];
 }
+
+export function createEmptyBoard(size) {
+	let emptyBoard = document.createElement("canvas");
+	emptyBoard.id = "board";
+	emptyBoard.height = size;
+	emptyBoard.width = size;
+	emptyBoard.style.backgroundColor = "black";
+	return emptyBoard;
+}
