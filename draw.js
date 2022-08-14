@@ -5,7 +5,7 @@ export function drawAllPossibleTiles(board) {
 	let i = 0;
 	for (let column of board) {
 		for (let cell of column) {
-			for (let tileNb in [0, 1, 2, 3]) {
+			for (let tileNb in [0, 1, 2, 3, 4,5,6,7,8,9,10,11,12,13]) {
 				if (!cell.collapsed) {
 					let tile = cell.possibleTiles[tileNb];
 					if (tile === undefined) {

@@ -41,7 +41,7 @@ export function compareLeft(middleCell, neighborCell) {
 			}
 		}
 		neighborCell.possibleTiles = newPossibleTiles;
-		console.log("left", neighborCell.possibleTiles.slice());
+		// console.log("left", neighborCell.possibleTiles.slice());
 	}
 }
 
@@ -54,7 +54,7 @@ export function compareUp(middleCell, neighborCell) {
 			}
 		}
 		neighborCell.possibleTiles = newPossibleTiles;
-		console.log("up", neighborCell.possibleTiles.slice());
+		// console.log("up", neighborCell.possibleTiles.slice());
 	}
 }
 
@@ -67,7 +67,7 @@ export function compareDown(middleCell, neighborCell) {
 			}
 		}
 		neighborCell.possibleTiles = newPossibleTiles;
-		console.log("down", neighborCell.possibleTiles.slice());
+		// console.log("down", neighborCell.possibleTiles.slice());
 	}
 }
 
@@ -82,6 +82,6 @@ export function compareRight(middleCell, neighborCell) {
 			}
 		}
 		neighborCell.possibleTiles = newPossibleTiles;
-		console.log("right", neighborCell.possibleTiles.slice());
+		// console.log("right", neighborCell.possibleTiles.slice());
 	}
 }

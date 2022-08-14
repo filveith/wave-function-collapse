@@ -106,8 +106,8 @@ function loop() {
 		let possibleNeighborCells;
 
 		try {
-			console.log("new cells pile", newCells.slice());
-			console.log(newCells[0]);
+			// console.log("new cells pile", newCells.slice());
+			// console.log(newCells[0]);
 			neighborCells = getNeighbors(newCells[0], cells);
 
 			possibleNeighborCells = getPossibleNeighborCells(neighborCells);
