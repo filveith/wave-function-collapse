@@ -20,9 +20,18 @@ const TILES_LIST = [DOWN, LEFT, RIGHT, UP];
 
 let board;
 let cells = [];
+let newCells = [];
 
 let avalaibleCells = [];
+
 let pause = false;
+let speed = 5000; // speed is in ms
+
+let interval;
+
+window.onload = () => {
+	document.getElementById("speedSlider").setAttribute("value", speed);
+};
 
 const emptyCell = {
 	coordinates: { x: undefined, y: undefined },
@@ -39,6 +48,7 @@ function setup() {
 	document.getElementById("myBtn").addEventListener("click", () => {
 		pause = !pause;
 	});
+	document.getElementById("speedSlider").addEventListener("change", setSpeed);
 	cells = Array.from({ length: DIM }, (e, y) =>
 		Array.from({ length: DIM }, (e, x) => {
 			const newEmptyCell = Object.assign({}, emptyCell);
@@ -52,14 +62,6 @@ function setup() {
 	board = createEmptyBoard(CANVAS_SIZE);
 	document.body.append(board);
 
-	loop(0);
-}
-
-//speed is in millis
-function loop(speed) {
-	let newCell, newTile;
-	let newCells = [];
-
 	const startCell = getRandomCell(avalaibleCells);
 	const startTile = getRandomTile(startCell.possibleTiles);
 	updateCell(startTile, startCell);
@@ -69,13 +71,21 @@ function loop(speed) {
 
 	newCells.push(startCell);
 
-	const interval = setInterval(() => {
+	loop();
+}
+
+//speed is in millis
+function loop() {
+	let newCell, newTile;
+
+	interval = setInterval(() => {
 		if (!pause) {
 			// When all the cells are collapsed we stop the interval
 			if (avalaibleCells.length === 0) {
 				console.log("Finished");
 				clearInterval(interval);
 			}
+
 			let neighborCells;
 			let possibleNeighborCells;
 
@@ -116,6 +126,12 @@ function loop(speed) {
 			// drawAllPossibleTiles(cells);
 		}
 	}, speed);
+}
+
+function setSpeed() {
+	speed = this.value;
+	clearInterval(interval);
+	interval = setInterval(loop, speed);
 }
 
 function getPossibleNeighborCells(neighborCells) {
