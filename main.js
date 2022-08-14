@@ -1,3 +1,4 @@
+import { getPossibleNeighborCells, updateCell } from "./cell.js";
 import { drawAllPossibleTiles, drawTile } from "./draw.js";
 import {
 	CANVAS_SIZE,
@@ -15,6 +16,10 @@ const DOWN = { src: "img/down.png", faces: [0, 1, 1, 1] };
 const LEFT = { src: "img/left.png", faces: [1, 0, 1, 1] };
 const RIGHT = { src: "img/right.png", faces: [1, 1, 1, 0] };
 const UP = { src: "img/up.png", faces: [1, 1, 0, 1] };
+const DOWN_END = { src: "img/down_end.png", faces: [1, 0, 0, 0] };
+const LEFT_END = { src: "img/left_end.png", faces: [0, 0, 0, 1] };
+const RIGHT_END = { src: "img/right_end.png", faces: [0, 1, 0, 0] };
+const UP_END = { src: "img/up_end.png", faces: [0, 0, 1, 0] };
 const HORIZONTAL = { src: "img/horizontal.png", faces: [0, 1, 0, 1] };
 const VERTICAL = { src: "img/vertical.png", faces: [1, 0, 1, 0] };
 
@@ -69,7 +74,7 @@ function setup() {
 
 	const startCell = getRandomCell(avalaibleCells);
 	const startTile = getRandomTile(startCell.possibleTiles);
-	updateCell(startTile, startCell);
+	updateCell(startTile, startCell, avalaibleCells);
 	updateNeighborCells(startCell);
 	// drawAllPossibleTiles(cells);
 	drawTile(startTile, startCell.coordinates.x, startCell.coordinates.y);
@@ -94,8 +99,9 @@ function loop() {
 		let possibleNeighborCells;
 
 		try {
-			// console.log("new cells pile", newCells.slice());
-			neighborCells = getNeighbors(newCells[0]);
+			console.log("new cells pile", newCells.slice());
+			console.log(newCells[0]);
+			neighborCells = getNeighbors(newCells[0], cells);
 
 			possibleNeighborCells = getPossibleNeighborCells(neighborCells);
 
@@ -111,7 +117,7 @@ function loop() {
 				}
 				drawTile(newTile, newCell.coordinates.x, newCell.coordinates.y);
 
-				updateCell(newTile, newCell);
+				updateCell(newTile, newCell, avalaibleCells);
 				updateNeighborCells(newCell);
 
 				newCells.push(newCell);
@@ -127,34 +133,7 @@ function loop() {
 	}
 }
 
-function setSpeed() {
-	speed = this.value;
-	clearInterval(interval);
-	interval = setInterval(loop, speed);
-	// document.getElementById("speedRange").setAttribute("value", speed);
-	// document.getElementById("speedInput").setAttribute("value", speed);
-}
-
-function getPossibleNeighborCells(neighborCells) {
-	let possibleNeighbors = [];
-	for (const neighborCell of neighborCells) {
-		// we add null values to keep the order of the array and always know the position of each cell (left, up, right, down)
-		try {
-			// If the cell is collapsed we insert a null value
-			if (!neighborCell.collapsed) {
-				possibleNeighbors.push(neighborCell);
-			} else {
-				possibleNeighbors.push(null);
-			}
-		} catch (error) {
-			// if the cell is the array is null we also push the null value
-			possibleNeighbors.push(null);
-		}
-	}
-	return possibleNeighbors;
-}
-
-function getNeighbors(fromCell) {
+function getNeighbors(fromCell, cells) {
 	// console.log(fromCell);
 	const cellX = fromCell.coordinates.x;
 	const cellY = fromCell.coordinates.y;
@@ -176,29 +155,17 @@ function getNeighbors(fromCell) {
 	return neighborCells;
 }
 
-function updateCell(tile, cell) {
-	// console.log("update cell", cell);
-	if (cell) {
-		cell.possibleTiles = [];
-		cell.collapsed = true;
-		cell.currentTile = tile;
-		avalaibleCells.splice(cell, 1);
-	}
+function setSpeed() {
+	speed = this.value;
+	clearInterval(interval);
+	interval = setInterval(loop, speed);
+	// document.getElementById("speedRange").setAttribute("value", speed);
+	// document.getElementById("speedInput").setAttribute("value", speed);
 }
 
 function updateNeighborCells(cell) {
-	/**
-	 * TODO :
-	 *
-	 * get all the non collapsed neighbors
-	 * get the tile of the current cell
-	 *
-	 * take each neighborCell[x]
-	 * remove the tiles that don't match the context
-	 *
-	 *
-	 */
-	const neighbors = getNeighbors(cell);
+
+	const neighbors = getNeighbors(cell, cells);
 	// we only want to update the non collapsed neighbor cells because the collapsed cells don't need to be updated
 	const neighborToUpdate = getPossibleNeighborCells(neighbors);
 	const currentCellTile = cell.currentTile;
@@ -207,23 +174,27 @@ function updateNeighborCells(cell) {
 		down = 2,
 		right = 3;
 
-	// pb is because we only take into account one neighbor and not all the neighbors
-	// so if we have a tile facing left and another tile facing up the possible tiles will be Down,Up,Right even though they should be Down only
-	// maybe do something with concat
-
-	// solution could be to remove the cells that are not right
-
-	// when adding a new cell we update the one next to it
-	// update --> remove the tiles that don't fit into the current context (ONLY REMOVE)
 	// console.log("__________________updateNeighborCells___________________");
 	// console.log("currentCellTile", currentCellTile);
 	if (currentCellTile) {
 		switch (currentCellTile) {
 			case LEFT:
 				// console.log("LEFT");
-				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT, VERTICAL);
-				removeTileFromPossibleTiles(neighborToUpdate[up], UP, HORIZONTAL);
-				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN, HORIZONTAL);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[left],
+					LEFT,
+					VERTICAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[up],
+					UP,
+					HORIZONTAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[down],
+					DOWN,
+					HORIZONTAL
+				);
 				removeTileFromPossibleTiles(
 					neighborToUpdate[right],
 					DOWN,
@@ -234,8 +205,16 @@ function updateNeighborCells(cell) {
 				break;
 			case UP:
 				// console.log("UP");
-				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT, VERTICAL);
-				removeTileFromPossibleTiles(neighborToUpdate[up], UP, HORIZONTAL);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[left],
+					LEFT,
+					VERTICAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[up],
+					UP,
+					HORIZONTAL
+				);
 				removeTileFromPossibleTiles(
 					neighborToUpdate[down],
 					UP,
@@ -243,11 +222,19 @@ function updateNeighborCells(cell) {
 					RIGHT,
 					VERTICAL
 				);
-				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT, VERTICAL);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[right],
+					RIGHT,
+					VERTICAL
+				);
 				break;
 			case DOWN:
 				// console.log("DOWN");
-				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT, VERTICAL);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[left],
+					LEFT,
+					VERTICAL
+				);
 				removeTileFromPossibleTiles(
 					neighborToUpdate[up],
 					DOWN,
@@ -255,8 +242,16 @@ function updateNeighborCells(cell) {
 					RIGHT,
 					VERTICAL
 				);
-				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN, HORIZONTAL);
-				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT, VERTICAL);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[down],
+					DOWN,
+					HORIZONTAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[right],
+					RIGHT,
+					VERTICAL
+				);
 				break;
 			case RIGHT:
 				// console.log("RIGHT");
@@ -267,9 +262,21 @@ function updateNeighborCells(cell) {
 					RIGHT,
 					HORIZONTAL
 				);
-				removeTileFromPossibleTiles(neighborToUpdate[up], UP, HORIZONTAL);
-				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN, HORIZONTAL);
-				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT, VERTICAL);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[up],
+					UP,
+					HORIZONTAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[down],
+					DOWN,
+					HORIZONTAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[right],
+					RIGHT,
+					VERTICAL
+				);
 				break;
 			case HORIZONTAL:
 				// console.log("RIGHT");
@@ -307,9 +314,23 @@ function updateNeighborCells(cell) {
 					RIGHT,
 					HORIZONTAL
 				);
-				removeTileFromPossibleTiles(neighborToUpdate[up], UP, HORIZONTAL);
-				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN, HORIZONTAL);
-				removeTileFromPossibleTiles(neighborToUpdate[right], UP, DOWN, LEFT, HORIZONTAL);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[up],
+					UP,
+					HORIZONTAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[down],
+					DOWN,
+					HORIZONTAL
+				);
+				removeTileFromPossibleTiles(
+					neighborToUpdate[right],
+					UP,
+					DOWN,
+					LEFT,
+					HORIZONTAL
+				);
 				break;
 			case EMPTY:
 				// console.log("EMPTY");

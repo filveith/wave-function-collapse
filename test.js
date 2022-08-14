@@ -1,136 +1,70 @@
-// const letters = [
-// 	{
-// 		letter: "a",
-// 	},
-// 	{
-// 		letter: "b",
-// 	},
-// 	{
-// 		letter: "c",
-// 	},
-// ];
-
-// const x = 2
-// const y = 0
-// const avalaibleCells= [
-//   {
-//       "x": 0,
-//       "y": 0
-//   },
-//   {
-//       "x": 0,
-//       "y": 1
-//   },
-//   {
-//       "x": 0,
-//       "y": 2
-//   },
-//   {
-//       "x": 0,
-//       "y": 3
-//   },
-//   {
-//       "x": 1,
-//       "y": 0
-//   },
-//   {
-//       "x": 1,
-//       "y": 1
-//   },
-//   {
-//       "x": 1,
-//       "y": 2
-//   },
-//   {
-//       "x": 1,
-//       "y": 3
-//   },
-//   {
-//       "x": 2,
-//       "y": 0
-//   },
-//   {
-//       "x": 2,
-//       "y": 1
-//   },
-//   {
-//       "x": 2,
-//       "y": 2
-//   },
-//   {
-//       "x": 2,
-//       "y": 3
-//   },
-//   {
-//       "x": 3,
-//       "y": 0
-//   },
-//   {
-//       "x": 3,
-//       "y": 1
-//   },
-//   {
-//       "x": 3,
-//       "y": 2
-//   },
-//   {
-//       "x": 3,
-//       "y": 3
-//   }
-// ]
-
-// const index = letters.findIndex((element) => {
-// 	if (element.letter === "b") {
-// 		return true;
-// 	}
-// });
-
-// const indexCell = avalaibleCells.findIndex((cell) => {
-// 	if (cell.x === x && cell.y === y) {
-// 		return true;
-// 	}
-// });
-
-// let updatedCell = avalaibleCells.find(findCell,{x,y});
-
-// function findCell(cell) {
-// 	return cell.x === this.x && cell.y === this.y;
-// }
-
-// // console.log(updatedCell);
-// console.log(indexCell);
-// // console.log(index);
-
+//faces = [up, right, down, left]
 const EMPTY = { src: "img/blank.png", faces: [0, 0, 0, 0] };
 const DOWN = { src: "img/down.png", faces: [0, 1, 1, 1] };
 const LEFT = { src: "img/left.png", faces: [1, 0, 1, 1] };
 const RIGHT = { src: "img/right.png", faces: [1, 1, 1, 0] };
 const UP = { src: "img/up.png", faces: [1, 1, 0, 1] };
+const HORIZONTAL = { src: "img/horizontal.png", faces: [0, 1, 0, 1] };
+const VERTICAL = { src: "img/vertical.png", faces: [1, 0, 1, 0] };
 
-const TILES_LIST = [DOWN, LEFT, RIGHT, UP];
+const TILES_LIST = [DOWN, LEFT, RIGHT, UP, HORIZONTAL, VERTICAL];
 let tiles = TILES_LIST.slice();
-// let t = TILES_LIST.slice();
-// const k = t.findIndex((cell) => cell === LEFT);
-// t.splice(k, 1);
-// console.log(k);
-// console.log(t);
+
 // console.log(tiles);
-removeTileFromPossibleTiles(tiles, RIGHT, LEFT, UP);
-function removeTileFromPossibleTiles(tiles) {
-	// How to use overload ?
-	for (let i = 0; i < arguments.length; i++) {
-		console.log(i, tiles);
-		const k = tiles.findIndex(
-			(cell) =>
-				cell === arguments[1] ||
-				cell === arguments[2] ||
-				cell === arguments[3] ||
-				cell === arguments[4]
-		);
-		console.log(k);
-		if (k !== -1) {
-			tiles.splice(k, 1);
+
+const middleTile = LEFT;
+
+const leftCell = tiles.slice();
+const upCell = tiles.slice();
+const downCell = tiles.slice();
+const rightCell = tiles.slice();
+
+const up = 0;
+const right = 1;
+const down = 2;
+const left = 3;
+
+function compareLeft(middleTile, leftCell) {
+	let possibleTiles = [];
+	for (let leftTile of leftCell) {
+		if (leftTile.faces[right] === middleTile.faces[left]) {
+			possibleTiles.push(leftTile);
 		}
-		console.log(tiles);
 	}
+	console.log("left", possibleTiles);
 }
+
+function compareUp(middleTile, neighborCell) {
+	let possibleTiles = [];
+	for (let neighborTile of neighborCell) {
+		if (neighborTile.faces[down] === middleTile.faces[up]) {
+			possibleTiles.push(neighborTile);
+		}
+	}
+	console.log("up", possibleTiles);
+}
+
+function compareDown(middleTile, neighborCell) {
+	let possibleTiles = [];
+	for (let neighborTile of neighborCell) {
+		if (neighborTile.faces[up] === middleTile.faces[down]) {
+			possibleTiles.push(neighborTile);
+		}
+	}
+	console.log("down", possibleTiles);
+}
+
+function compareRight(middleTile, neighborCell) {
+	let possibleTiles = [];
+	for (let neighborTile of neighborCell) {
+		if (neighborTile.faces[left] === middleTile.faces[right]) {
+			possibleTiles.push(neighborTile);
+		}
+	}
+	console.log("right", possibleTiles);
+}
+
+compareLeft(middleTile, leftCell);
+compareRight(middleTile, rightCell);
+compareUp(middleTile, upCell);
+compareDown(middleTile, downCell);
