@@ -3,7 +3,6 @@ import { CANVAS_SIZE, DIM } from "./utils.js";
 
 export function drawAllPossibleTiles(board) {
 	let i = 0;
-	console.log(board);
 	for (let column of board) {
 		for (let cell of column) {
 			for (let tileNb in [0, 1, 2, 3]) {
@@ -73,7 +72,7 @@ function draw(imgObject, x, y, w, h) {
 // }
 
 export function drawTile(imgObject, x, y, w, h) {
-	console.log("DRAW", imgObject);
+	// console.log("DRAW", imgObject);
 	if (imgObject) {
 		const canvas = document.getElementById("board");
 		let ctx = canvas.getContext("2d");

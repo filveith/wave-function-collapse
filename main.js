@@ -20,9 +20,25 @@ const TILES_LIST = [DOWN, LEFT, RIGHT, UP];
 
 let board;
 let cells = [];
+let newCells = [];
 
 let avalaibleCells = [];
+
 let pause = false;
+let speed = 500; // speed is in ms
+
+let interval;
+
+window.onload = () => {
+	document.getElementById("speedRange").setAttribute("value", speed);
+	document.getElementById("speedInput").setAttribute("value", speed);
+
+	document.getElementById("myBtn").addEventListener("click", () => {
+		pause = !pause;
+	});
+	document.getElementById("speedRange").addEventListener("change", setSpeed);
+	document.getElementById("speedInput").addEventListener("input", setSpeed);
+};
 
 const emptyCell = {
 	coordinates: { x: undefined, y: undefined },
@@ -36,9 +52,6 @@ const emptyCell = {
 };
 
 function setup() {
-	document.getElementById("myBtn").addEventListener("click", () => {
-		pause = !pause;
-	});
 	cells = Array.from({ length: DIM }, (e, y) =>
 		Array.from({ length: DIM }, (e, x) => {
 			const newEmptyCell = Object.assign({}, emptyCell);
@@ -52,14 +65,6 @@ function setup() {
 	board = createEmptyBoard(CANVAS_SIZE);
 	document.body.append(board);
 
-	loop(0);
-}
-
-//speed is in millis
-function loop(speed) {
-	let newCell, newTile;
-	let newCells = [];
-
 	const startCell = getRandomCell(avalaibleCells);
 	const startTile = getRandomTile(startCell.possibleTiles);
 	updateCell(startTile, startCell);
@@ -69,53 +74,63 @@ function loop(speed) {
 
 	newCells.push(startCell);
 
-	const interval = setInterval(() => {
-		if (!pause) {
-			// When all the cells are collapsed we stop the interval
-			if (avalaibleCells.length === 0) {
-				console.log("Finished");
-				clearInterval(interval);
-			}
-			let neighborCells;
-			let possibleNeighborCells;
+	interval = setInterval(loop, speed);
+}
 
+//speed is in millis
+function loop() {
+	let newCell, newTile;
+
+	if (!pause) {
+		// When all the cells are collapsed we stop the interval
+		if (avalaibleCells.length === 0) {
+			console.log("Finished");
+			clearInterval(interval);
+		}
+
+		let neighborCells;
+		let possibleNeighborCells;
+
+		try {
 			// console.log("new cells pile", newCells.slice());
 			neighborCells = getNeighbors(newCells[0]);
 
 			possibleNeighborCells = getPossibleNeighborCells(neighborCells);
 
 			newCell = getRandomCell(possibleNeighborCells);
-			try {
-				if (newCell) {
-					if (newCell.possibleTiles) {
-						newTile = getRandomTile(newCell.possibleTiles);
-					} else {
-						newTile = EMPTY;
-					}
-					if (newTile === undefined) {
-						newTile = EMPTY;
-					}
-					drawTile(
-						newTile,
-						newCell.coordinates.x,
-						newCell.coordinates.y
-					);
-
-					updateCell(newTile, newCell);
-					updateNeighborCells(newCell);
-
-					newCells.push(newCell);
+			if (newCell) {
+				if (newCell.possibleTiles) {
+					newTile = getRandomTile(newCell.possibleTiles);
 				} else {
-					newCells.shift();
+					newTile = EMPTY;
 				}
-			} catch (error) {
-				console.log("err loop", error);
+				if (newTile === undefined) {
+					newTile = EMPTY;
+				}
+				drawTile(newTile, newCell.coordinates.x, newCell.coordinates.y);
+
+				updateCell(newTile, newCell);
+				updateNeighborCells(newCell);
+
+				newCells.push(newCell);
+			} else {
 				newCells.shift();
 			}
-			// pause = true;
-			// drawAllPossibleTiles(cells);
+		} catch (error) {
+			console.log("err loop", error);
+			newCells.shift();
 		}
-	}, speed);
+		// pause = true;
+		// drawAllPossibleTiles(cells);
+	}
+}
+
+function setSpeed() {
+	speed = this.value;
+	clearInterval(interval);
+	interval = setInterval(loop, speed);
+	// document.getElementById("speedRange").setAttribute("value", speed);
+	// document.getElementById("speedInput").setAttribute("value", speed);
 }
 
 function getPossibleNeighborCells(neighborCells) {
@@ -138,7 +153,7 @@ function getPossibleNeighborCells(neighborCells) {
 }
 
 function getNeighbors(fromCell) {
-	console.log(fromCell);
+	// console.log(fromCell);
 	const cellX = fromCell.coordinates.x;
 	const cellY = fromCell.coordinates.y;
 	let neighborCells = [];
@@ -160,7 +175,7 @@ function getNeighbors(fromCell) {
 }
 
 function updateCell(tile, cell) {
-	console.log("update cell", cell);
+	// console.log("update cell", cell);
 	if (cell) {
 		cell.possibleTiles = [];
 		cell.collapsed = true;
@@ -198,12 +213,12 @@ function updateNeighborCells(cell) {
 
 	// when adding a new cell we update the one next to it
 	// update --> remove the tiles that don't fit into the current context (ONLY REMOVE)
-	console.log("__________________updateNeighborCells___________________");
-	console.log("currentCellTile", currentCellTile);
+	// console.log("__________________updateNeighborCells___________________");
+	// console.log("currentCellTile", currentCellTile);
 	if (currentCellTile) {
 		switch (currentCellTile) {
 			case LEFT:
-				console.log("LEFT");
+				// console.log("LEFT");
 				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
 				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
 				removeTileFromPossibleTiles(neighborToUpdate[down], DOWN);
@@ -215,7 +230,7 @@ function updateNeighborCells(cell) {
 				);
 				break;
 			case UP:
-				console.log("UP");
+				// console.log("UP");
 				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
 				removeTileFromPossibleTiles(neighborToUpdate[up], UP);
 				removeTileFromPossibleTiles(
@@ -227,7 +242,7 @@ function updateNeighborCells(cell) {
 				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
 			case DOWN:
-				console.log("DOWN");
+				// console.log("DOWN");
 				removeTileFromPossibleTiles(neighborToUpdate[left], LEFT);
 				removeTileFromPossibleTiles(
 					neighborToUpdate[up],
@@ -239,7 +254,7 @@ function updateNeighborCells(cell) {
 				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
 			case RIGHT:
-				console.log("RIGHT");
+				// console.log("RIGHT");
 				removeTileFromPossibleTiles(
 					neighborToUpdate[left],
 					DOWN,
@@ -251,7 +266,7 @@ function updateNeighborCells(cell) {
 				removeTileFromPossibleTiles(neighborToUpdate[right], RIGHT);
 				break;
 			case EMPTY:
-				console.log("EMPTY");
+				// console.log("EMPTY");
 				removeTileFromPossibleTiles(
 					neighborToUpdate[left],
 					UP,
@@ -292,8 +307,8 @@ function removeTileFromPossibleTiles(cell) {
 	if (cell) {
 		cell.possibleTiles = cell.possibleTiles.slice();
 		// console.log([cell].slice());
-		console.log("before", cell.possibleTiles.slice());
-		console.log(arguments);
+		// console.log("before", cell.possibleTiles.slice());
+		// console.log(arguments);
 		// arguments is always the cell to remove the tiles from and the tiles to remove
 		// we loop over the cell because it will always be -1 in find index
 		for (let argument of arguments) {
@@ -304,8 +319,8 @@ function removeTileFromPossibleTiles(cell) {
 			// console.log(k);
 			if (k !== -1) {
 				const removedPossibleTiles = cell.possibleTiles.splice(k, 1);
-				console.log("removed tiles", removedPossibleTiles);
-				console.log("after", cell.possibleTiles.slice());
+				// console.log("removed tiles", removedPossibleTiles);
+				// console.log("after", cell.possibleTiles.slice());
 			}
 		}
 	}
