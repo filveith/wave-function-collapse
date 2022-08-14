@@ -1,4 +1,4 @@
-export const DIM = 4;
+export const DIM = 100;
 export const CANVAS_SIZE = 400;
 
 function getRandomInt(max) {
