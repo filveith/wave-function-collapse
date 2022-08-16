@@ -1,4 +1,11 @@
-import { compareDown, compareLeft, compareRight, compareUp, getPossibleNeighborCells, updateCell } from "./cell.js";
+import {
+	compareDown,
+	compareLeft,
+	compareRight,
+	compareUp,
+	getPossibleNeighborCells,
+	updateCell,
+} from "./cell.js";
 import { drawAllPossibleTiles, drawTile } from "./draw.js";
 import {
 	CANVAS_SIZE,
@@ -22,15 +29,37 @@ const LEFT_END = { src: "img/left_end.png", faces: [0, 0, 0, 1] };
 const RIGHT_END = { src: "img/right_end.png", faces: [0, 1, 0, 0] };
 const UP_END = { src: "img/up_end.png", faces: [0, 0, 1, 0] };
 
-const CORNER_DOWN_RIGHT = { src: "img/corner_down_right.png", faces: [0, 1, 1, 0] };
-const CORNER_DOWN_LEFT = { src: "img/corner_down_left.png", faces: [0, 0, 1, 1] };
+const CORNER_DOWN_RIGHT = {
+	src: "img/corner_down_right.png",
+	faces: [0, 1, 1, 0],
+};
+const CORNER_DOWN_LEFT = {
+	src: "img/corner_down_left.png",
+	faces: [0, 0, 1, 1],
+};
 const CORNER_UP_RIGHT = { src: "img/corner_up_right.png", faces: [1, 1, 0, 0] };
 const CORNER_UP_LEFT = { src: "img/corner_up_left.png", faces: [1, 0, 0, 1] };
 
 const HORIZONTAL = { src: "img/horizontal.png", faces: [0, 1, 0, 1] };
 const VERTICAL = { src: "img/vertical.png", faces: [1, 0, 1, 0] };
 
-const TILES_LIST = [DOWN, LEFT, RIGHT, UP, HORIZONTAL, VERTICAL, DOWN_END, LEFT_END, UP_END, RIGHT_END, CORNER_DOWN_RIGHT, CORNER_DOWN_LEFT, CORNER_UP_LEFT, CORNER_UP_RIGHT];
+// The tiles that are used in the image
+const TILES_LIST = [
+	DOWN,
+	LEFT,
+	RIGHT,
+	UP,
+	HORIZONTAL,
+	VERTICAL,
+	DOWN_END,
+	LEFT_END,
+	UP_END,
+	RIGHT_END,
+	CORNER_DOWN_RIGHT,
+	CORNER_DOWN_LEFT,
+	CORNER_UP_LEFT,
+	CORNER_UP_RIGHT,
+];
 
 let board;
 let cells = [];
@@ -47,8 +76,18 @@ window.onload = () => {
 	document.getElementById("speedRange").setAttribute("value", speed);
 	document.getElementById("speedInput").setAttribute("value", speed);
 
-	document.getElementById("myBtn").addEventListener("click", () => {
+	document.getElementById("pauseButton").addEventListener("click", () => {
 		pause = !pause;
+	});
+	document.getElementById("generateBtn").addEventListener("click", () => {
+		clearInterval(interval);
+		try {
+			document.getElementById("board").remove();
+		} catch (error) {
+			console.log(error);
+		}
+		setup();
+		interval = setInterval(loop, speed);
 	});
 	document.getElementById("speedRange").addEventListener("change", setSpeed);
 	document.getElementById("speedInput").addEventListener("input", setSpeed);
@@ -75,6 +114,7 @@ function setup() {
 	);
 
 	avalaibleCells = cells.flat();
+	newCells = [];
 	// console.log(cells);
 	board = createEmptyBoard(CANVAS_SIZE);
 	document.body.append(board);
@@ -87,8 +127,6 @@ function setup() {
 	drawTile(startTile, startCell.coordinates.x, startCell.coordinates.y);
 
 	newCells.push(startCell);
-
-	interval = setInterval(loop, speed);
 }
 
 //speed is in millis
@@ -174,7 +212,6 @@ function updateNeighborCells(cell) {
 	const neighbors = getNeighbors(cell, cells);
 	// we only want to update the non collapsed neighbor cells because the collapsed cells don't need to be updated
 	const neighborToUpdate = getPossibleNeighborCells(neighbors);
-	const currentCellTile = cell.currentTile;
 	const left = 0,
 		up = 1,
 		down = 2,
@@ -193,3 +230,4 @@ function updateNeighborCells(cell) {
 }
 
 setup();
+interval = setInterval(loop, speed);
