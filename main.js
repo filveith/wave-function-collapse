@@ -6,10 +6,11 @@ import {
 	getPossibleNeighborCells,
 	updateCell,
 } from "./cell.js";
-import { drawAllPossibleTiles, drawTile } from "./draw.js";
+import { drawTile } from "./draw.js";
 import {
 	CANVAS_SIZE,
 	createEmptyBoard,
+	createTileSelector,
 	DIM,
 	getRandomCell,
 	getRandomTile,
@@ -43,8 +44,24 @@ const CORNER_UP_LEFT = { src: "img/corner_up_left.png", faces: [1, 0, 0, 1] };
 const HORIZONTAL = { src: "img/horizontal.png", faces: [0, 1, 0, 1] };
 const VERTICAL = { src: "img/vertical.png", faces: [1, 0, 1, 0] };
 
+const POSSIBLE_TILES = [
+	DOWN,
+	LEFT,
+	RIGHT,
+	UP,
+	HORIZONTAL,
+	VERTICAL,
+	DOWN_END,
+	LEFT_END,
+	UP_END,
+	RIGHT_END,
+	CORNER_DOWN_RIGHT,
+	CORNER_DOWN_LEFT,
+	CORNER_UP_LEFT,
+	CORNER_UP_RIGHT,
+];
 // The tiles that are used in the image
-const TILES_LIST = [
+const TILE_LIST = [
 	DOWN,
 	LEFT,
 	RIGHT,
@@ -73,6 +90,15 @@ let speed = 500; // speed is in ms
 let interval;
 
 window.onload = () => {
+	const tileSelector = createTileSelector(POSSIBLE_TILES);
+	document.getElementById('tileSelectorDiv').append(tileSelector);
+
+	for (let tile of POSSIBLE_TILES) {
+		document
+			.getElementById(tile.src.replace("img/", "").replace(".png", ""))
+			.addEventListener("click", setTileList);
+	}
+
 	document.getElementById("speedRange").setAttribute("value", speed);
 	document.getElementById("speedInput").setAttribute("value", speed);
 
@@ -93,18 +119,19 @@ window.onload = () => {
 	document.getElementById("speedInput").addEventListener("input", setSpeed);
 };
 
-const emptyCell = {
-	coordinates: { x: undefined, y: undefined },
-	possibleTiles: TILES_LIST.slice(),
-	// If a tile has been set on this cell or not
-	collapsed: false,
-	// If a tile can be set on the cell
-	inRange: true,
-	// When collapsed true this contains the current tile on the cell
-	currentTile: null,
-};
-
 function setup() {
+	const emptyCell = {
+		coordinates: { x: undefined, y: undefined },
+		possibleTiles: TILE_LIST.slice(),
+		// If a tile has been set on this cell or not
+		collapsed: false,
+		// If a tile can be set on the cell
+		inRange: true,
+		// When collapsed true this contains the current tile on the cell
+		currentTile: null,
+	};
+
+
 	cells = Array.from({ length: DIM }, (e, y) =>
 		Array.from({ length: DIM }, (e, x) => {
 			const newEmptyCell = Object.assign({}, emptyCell);
@@ -117,7 +144,7 @@ function setup() {
 	newCells = [];
 	// console.log(cells);
 	board = createEmptyBoard(CANVAS_SIZE);
-	document.body.append(board);
+	document.getElementById('boardDiv').append(board);
 
 	const startCell = getRandomCell(avalaibleCells);
 	const startTile = getRandomTile(startCell.possibleTiles);
@@ -206,6 +233,21 @@ function setSpeed() {
 	interval = setInterval(loop, speed);
 	// document.getElementById("speedRange").setAttribute("value", speed);
 	// document.getElementById("speedInput").setAttribute("value", speed);
+}
+
+function setTileList() {
+	const tileName = "img/" + this.value + ".png"
+
+	const tile = POSSIBLE_TILES.filter((tile) => tile.src === tileName)
+	const index = TILE_LIST.indexOf(tile[0])
+	console.log(tile);
+	console.log(index);
+	if (index === -1) {
+		TILE_LIST.splice(0,0,tile)
+	} else {
+		TILE_LIST.splice(index, 1);
+	}
+	console.log(TILE_LIST);
 }
 
 function updateNeighborCells(cell) {

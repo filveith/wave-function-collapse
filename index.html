@@ -14,14 +14,19 @@
 </head>
 
 <body>
-
-    <button id="pauseButton">Pause</button>
-    <button id="generateBtn">Generate</button>
-    <form>
-        Speed of generation (in ms)
-        <input type="range" id="speedRange" min="0" max="10000" value="0" oninput="this.form.speedInput.value=this.value" />
-        <input type="number" id="speedInput" min="0" max="10000" value="0" oninput="this.form.speedRange.value=this.value" />
-    </form>
+    <div style="height: 10vh;">
+        <button id="pauseButton">Pause</button>
+        <button id="generateBtn">Generate</button>
+        <form>
+            Speed of generation (in ms)
+            <input type="range" id="speedRange" min="0" max="10000" value="0" oninput="this.form.speedInput.value=this.value" />
+            <input type="number" id="speedInput" min="0" max="10000" value="0" oninput="this.form.speedRange.value=this.value" />
+        </form>
+    </div>
+    <div id="board_tileSelector" style="height: 85vh; display:flex; flex-direction: row;">
+        <div id="boardDiv" style="height: 100%;"></div>
+        <div id="tileSelectorDiv" style="height: 80vh;overflow: auto;"></div>
+    </div>
     <script type="module" src="main.js"></script>
 </body>
 

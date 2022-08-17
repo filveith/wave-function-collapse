@@ -36,12 +36,11 @@ export function compareLeft(middleCell, neighborCell) {
 	if (neighborCell) {
 		let newPossibleTiles = [];
 		for (let leftTile of neighborCell.possibleTiles) {
-			if (leftTile.faces[right] === middleCell.currentTile.faces[left]) {
+			if (leftTile.faces[right] === middleCell.currentTile.faces[left] ?? -1) {
 				newPossibleTiles.push(leftTile);
 			}
 		}
 		neighborCell.possibleTiles = newPossibleTiles;
-		// console.log("left", neighborCell.possibleTiles.slice());
 	}
 }
 
@@ -49,7 +48,7 @@ export function compareUp(middleCell, neighborCell) {
 	if (neighborCell) {
 		let newPossibleTiles = [];
 		for (let neighborTile of neighborCell.possibleTiles) {
-			if (neighborTile.faces[down] === middleCell.currentTile.faces[up]) {
+			if (neighborTile.faces[down] === middleCell.currentTile.faces[up] ?? -1) {
 				newPossibleTiles.push(neighborTile);
 			}
 		}
@@ -62,7 +61,7 @@ export function compareDown(middleCell, neighborCell) {
 	if (neighborCell) {
 		let newPossibleTiles = [];
 		for (let neighborTile of neighborCell.possibleTiles) {
-			if (neighborTile.faces[up] === middleCell.currentTile.faces[down]) {
+			if (neighborTile.faces[up] === middleCell.currentTile.faces[down] ?? -1) {
 				newPossibleTiles.push(neighborTile);
 			}
 		}
@@ -76,7 +75,7 @@ export function compareRight(middleCell, neighborCell) {
 		let newPossibleTiles = [];
 		for (let neighborTile of neighborCell.possibleTiles) {
 			if (
-				neighborTile.faces[left] === middleCell.currentTile.faces[right]
+				neighborTile.faces[left] === middleCell.currentTile.faces[right] ?? -1
 			) {
 				newPossibleTiles.push(neighborTile);
 			}
