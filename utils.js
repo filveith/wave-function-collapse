@@ -16,6 +16,17 @@ export function setCurrentDim(dim) {
 	currentDim = dim;
 }
 
+export function setTileList() {
+	const tileName = "img/" + this.id + ".png"
+	const tile = POSSIBLE_TILES.filter((tile) => tile.src === tileName)
+	const index = TILE_LIST.indexOf(tile[0])
+	if (index === -1) {
+		TILE_LIST.splice(0,0,tile[0])
+	} else {
+		TILE_LIST.splice(index, 1);
+	}
+}
+
 export function getRandomCell(cells) {
 	// We remove the null values to only get possible cells
 	const filteredCells = cells.filter((cell) => cell);

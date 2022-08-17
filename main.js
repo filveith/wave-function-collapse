@@ -17,6 +17,7 @@ import {
 	getRandomTile,
 	setCurrentDim,
 	setSize,
+	setTileList,
 } from "./utils.js";
 
 // The dimension is the width and height of the board
@@ -88,13 +89,13 @@ let newCells = [];
 let avalaibleCells = [];
 
 let pause = false;
-let speed = 500; // speed is in ms
+let speed = 300; // speed is in ms
 
 let interval;
 
 window.onload = () => {
 	const tileSelector = createTileSelector(POSSIBLE_TILES);
-	document.getElementById('tileSelectorDiv').append(tileSelector);
+	document.getElementById("tileSelectorDiv").append(tileSelector);
 
 	for (let tile of POSSIBLE_TILES) {
 		document
@@ -116,15 +117,15 @@ window.onload = () => {
 			console.log(error);
 		}
 		setup();
-		interval = setInterval(loop, speed);
+		newIntervalId(setInterval(loop, speed));
 	});
-	document.getElementById('sizeSelector').addEventListener("change", setSize)
+	document.getElementById("sizeSelector").addEventListener("change", setSize);
 	document.getElementById("speedRange").addEventListener("change", setSpeed);
 	document.getElementById("speedInput").addEventListener("input", setSpeed);
 };
 
 function setup() {
-	setCurrentDim(DIM)
+	setCurrentDim(DIM);
 	const emptyCell = {
 		coordinates: { x: undefined, y: undefined },
 		possibleTiles: TILE_LIST.slice(),
@@ -136,7 +137,6 @@ function setup() {
 		currentTile: null,
 	};
 
-
 	cells = Array.from({ length: currentDim }, (e, y) =>
 		Array.from({ length: currentDim }, (e, x) => {
 			const newEmptyCell = Object.assign({}, emptyCell);
@@ -147,8 +147,8 @@ function setup() {
 
 	avalaibleCells = cells.flat();
 	newCells = [];
-	board = createEmptyBoard(CANVAS_SIZE+currentDim, CANVAS_SIZE+currentDim);
-	document.getElementById('boardDiv').append(board);
+	board = createEmptyBoard(CANVAS_SIZE, CANVAS_SIZE);
+	document.getElementById("boardDiv").append(board);
 
 	const startCell = getRandomCell(avalaibleCells);
 	const startTile = getRandomTile(startCell.possibleTiles);
@@ -173,8 +173,6 @@ function loop() {
 		let possibleNeighborCells;
 
 		try {
-			// console.log("new cells pile", newCells.slice());
-			// console.log(newCells[0]);
 			neighborCells = getNeighbors(newCells[0], cells);
 
 			possibleNeighborCells = getPossibleNeighborCells(neighborCells);
@@ -202,20 +200,22 @@ function loop() {
 			console.log("err loop", error);
 			newCells.shift();
 		}
-		// pause = true;
-		// drawAllPossibleTiles(cells);
 	}
 }
 
 function getNeighbors(fromCell, cells) {
-	// console.log(fromCell);
 	const cellX = fromCell.coordinates.x;
 	const cellY = fromCell.coordinates.y;
 	let neighborCells = [];
 	for (let x = cellX - 1; x <= cellX + 1; x++) {
 		for (let y = cellY - 1; y <= cellY + 1; y++) {
 			try {
-				if (y >= 0 && x >= 0 && y <= currentDim - 1 && x <= currentDim - 1) {
+				if (
+					y >= 0 &&
+					x >= 0 &&
+					y <= currentDim - 1 &&
+					x <= currentDim - 1
+				) {
 					neighborCells.push(cells[y][x]);
 				} else {
 					neighborCells.push(null);
@@ -233,23 +233,6 @@ function setSpeed() {
 	speed = this.value;
 	clearInterval(interval);
 	interval = setInterval(loop, speed);
-	// document.getElementById("speedRange").setAttribute("value", speed);
-	// document.getElementById("speedInput").setAttribute("value", speed);
-}
-
-function setTileList() {
-	const tileName = "img/" + this.id + ".png"
-	console.log(this.id);
-	const tile = POSSIBLE_TILES.filter((tile) => tile.src === tileName)
-	const index = TILE_LIST.indexOf(tile[0])
-	console.log(tile);
-	console.log(index);
-	if (index === -1) {
-		TILE_LIST.splice(0,0,tile[0])
-	} else {
-		TILE_LIST.splice(index, 1);
-	}
-	console.log(TILE_LIST);
 }
 
 function updateNeighborCells(cell) {
@@ -261,10 +244,6 @@ function updateNeighborCells(cell) {
 		down = 2,
 		right = 3;
 
-	// console.log("__________________updateNeighborCells___________________");
-	// console.log("currentCellTile", currentCellTile);
-	// console.log('neighbors',neighborToUpdate);
-	// console.log('middleCell',cell);
 	if (cell) {
 		compareLeft(cell, neighborToUpdate[left]);
 		compareRight(cell, neighborToUpdate[right]);
