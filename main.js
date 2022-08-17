@@ -117,7 +117,7 @@ window.onload = () => {
 			console.log(error);
 		}
 		setup();
-		newIntervalId(setInterval(loop, speed));
+		interval = setInterval(loop, speed);
 	});
 	document.getElementById("sizeSelector").addEventListener("change", setSize);
 	document.getElementById("speedRange").addEventListener("change", setSpeed);
