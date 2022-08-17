@@ -22,6 +22,10 @@
             <input type="range" id="speedRange" min="0" max="10000" value="0" oninput="this.form.speedInput.value=this.value" />
             <input type="number" id="speedInput" min="0" max="10000" value="0" oninput="this.form.speedRange.value=this.value" />
         </form>
+        <form>
+            Dimension of board
+            <input type="number" id="sizeSelector" min="0" value="10">
+        </form>
     </div>
     <div id="board_tileSelector" style="height: 85vh; display:flex; flex-direction: row;">
         <div id="boardDiv" style="height: 100%;"></div>

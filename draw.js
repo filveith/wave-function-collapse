@@ -1,5 +1,5 @@
 import { EMPTY } from "./main.js";
-import { CANVAS_SIZE, DIM } from "./utils.js";
+import { CANVAS_SIZE, currentDim } from "./utils.js";
 
 export function drawAllPossibleTiles(board) {
 	let i = 0;
@@ -19,8 +19,8 @@ export function drawAllPossibleTiles(board) {
 						tile,
 						x,
 						cell.coordinates.y,
-						CANVAS_SIZE / DIM / 4,
-						CANVAS_SIZE / DIM / 4
+						CANVAS_SIZE / currentDim / 4,
+						CANVAS_SIZE / currentDim / 4
 					);
 				}
 			}
@@ -40,7 +40,7 @@ function draw(imgObject, x, y, w, h) {
 		img.src = imgObject.src;
 		img.onload = () => {
 			ctx.beginPath();
-			ctx.drawImage(img, x, (y * CANVAS_SIZE) / DIM, w, h);
+			ctx.drawImage(img, x, (y * CANVAS_SIZE) / currentDim, w, h);
 		};
 	}
 }
@@ -83,10 +83,10 @@ export function drawTile(imgObject, x, y, w, h) {
 			ctx.beginPath();
 			ctx.drawImage(
 				img,
-				(x * CANVAS_SIZE) / DIM,
-				(y * CANVAS_SIZE) / DIM,
-				w ? w : CANVAS_SIZE / DIM,
-				h ? h : CANVAS_SIZE / DIM
+				(x * CANVAS_SIZE) / currentDim,
+				(y * CANVAS_SIZE) / currentDim,
+				w ? w : CANVAS_SIZE / currentDim,
+				h ? h : CANVAS_SIZE / currentDim
 			);
 		};
 	}

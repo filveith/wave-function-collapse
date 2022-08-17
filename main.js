@@ -11,9 +11,12 @@ import {
 	CANVAS_SIZE,
 	createEmptyBoard,
 	createTileSelector,
+	currentDim,
 	DIM,
 	getRandomCell,
 	getRandomTile,
+	setCurrentDim,
+	setSize,
 } from "./utils.js";
 
 // The dimension is the width and height of the board
@@ -115,11 +118,13 @@ window.onload = () => {
 		setup();
 		interval = setInterval(loop, speed);
 	});
+	document.getElementById('sizeSelector').addEventListener("change", setSize)
 	document.getElementById("speedRange").addEventListener("change", setSpeed);
 	document.getElementById("speedInput").addEventListener("input", setSpeed);
 };
 
 function setup() {
+	setCurrentDim(DIM)
 	const emptyCell = {
 		coordinates: { x: undefined, y: undefined },
 		possibleTiles: TILE_LIST.slice(),
@@ -132,8 +137,8 @@ function setup() {
 	};
 
 
-	cells = Array.from({ length: DIM }, (e, y) =>
-		Array.from({ length: DIM }, (e, x) => {
+	cells = Array.from({ length: currentDim }, (e, y) =>
+		Array.from({ length: currentDim }, (e, x) => {
 			const newEmptyCell = Object.assign({}, emptyCell);
 			newEmptyCell.coordinates = { x: x, y: y };
 			return Object.assign({}, newEmptyCell);
@@ -142,21 +147,18 @@ function setup() {
 
 	avalaibleCells = cells.flat();
 	newCells = [];
-	// console.log(cells);
-	board = createEmptyBoard(CANVAS_SIZE);
+	board = createEmptyBoard(CANVAS_SIZE+currentDim, CANVAS_SIZE+currentDim);
 	document.getElementById('boardDiv').append(board);
 
 	const startCell = getRandomCell(avalaibleCells);
 	const startTile = getRandomTile(startCell.possibleTiles);
 	updateCell(startTile, startCell, avalaibleCells);
 	updateNeighborCells(startCell);
-	// drawAllPossibleTiles(cells);
 	drawTile(startTile, startCell.coordinates.x, startCell.coordinates.y);
 
 	newCells.push(startCell);
 }
 
-//speed is in millis
 function loop() {
 	let newCell, newTile;
 
@@ -213,7 +215,7 @@ function getNeighbors(fromCell, cells) {
 	for (let x = cellX - 1; x <= cellX + 1; x++) {
 		for (let y = cellY - 1; y <= cellY + 1; y++) {
 			try {
-				if (y >= 0 && x >= 0 && y <= DIM - 1 && x <= DIM - 1) {
+				if (y >= 0 && x >= 0 && y <= currentDim - 1 && x <= currentDim - 1) {
 					neighborCells.push(cells[y][x]);
 				} else {
 					neighborCells.push(null);
