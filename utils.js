@@ -41,7 +41,7 @@ export function createTileSelector(possibleTiles) {
 		let input = document.createElement("input");
 		input.type = "checkbox";
 		input.id = tileName;
-		input.value = tileName;
+		input.setAttribute('checked',true)
 
 		let label = document.createElement("label");
 		label.for = tileName;

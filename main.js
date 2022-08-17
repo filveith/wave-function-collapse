@@ -236,14 +236,14 @@ function setSpeed() {
 }
 
 function setTileList() {
-	const tileName = "img/" + this.value + ".png"
-
+	const tileName = "img/" + this.id + ".png"
+	console.log(this.id);
 	const tile = POSSIBLE_TILES.filter((tile) => tile.src === tileName)
 	const index = TILE_LIST.indexOf(tile[0])
 	console.log(tile);
 	console.log(index);
 	if (index === -1) {
-		TILE_LIST.splice(0,0,tile)
+		TILE_LIST.splice(0,0,tile[0])
 	} else {
 		TILE_LIST.splice(index, 1);
 	}
